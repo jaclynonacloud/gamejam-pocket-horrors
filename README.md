@@ -17,14 +17,16 @@ Battle with your pocket horror until you become the apex monster in the universe
 
 ## Goals
 ### Milestones
-- [ ] Basic Gameplay
+- [x] Basic Gameplay
+    - [x] Create World
+        - [x] Create Navigation
+        - [x] Create Obstacles
     - [ ] Create Player
         - [ ] Handle Movement/Inputs
+    - [ ] Create Game Camera
+        - [ ] Handle Target Tracking
     - [ ] Create Pocket Horrors
         - [ ] Create Movement
-    - [ ] Create World
-        - [ ] Create Navigation
-        - [ ] Create Obstacles
 - [ ] World Generation
     - [ ] Create Biomes
     - [ ] Spawn Pocket Horrors
