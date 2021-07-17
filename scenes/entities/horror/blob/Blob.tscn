@@ -12,7 +12,7 @@ move_speed = 15.0
 key = "Blob"
 
 [node name="CollisionShape" parent="." index="0"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0 )
+transform = Transform( 0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5, 0, 0.8745, 0 )
 shape = SubResource( 1 )
 
 [node name="Blob" parent="Meshes" index="0" instance=ExtResource( 2 )]

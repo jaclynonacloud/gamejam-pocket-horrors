@@ -9,22 +9,25 @@ const NAVIGATION_STUCK_MARGIN:float = 0.05
 
 export var key:String = "" setget , get_key
 export var readable:String = ""
+export (String, "SPECIES_BLOB", "SPECIES_BUTTERFLY") var species:String = ""
 export (float, 0.1, 10.0, 0.05) var size:float = 1.0 setget set_size
 export var navigation_path:NodePath
 export var navigation_point_margin:float = 1.0 setget , get_navigation_point_margin # how close before the point is considered reached
 export var stuck_check_interval:float = NAVIGATION_STUCK_CHECK_INTERVAL
+export (float, 0.0, 1.0, 0.01) var devotion:float = 0.0 # how devoted a species is to the player
 
 onready var navigation:Navigation = get_node_or_null(navigation_path)
 onready var meshes_container:Spatial = $Meshes
 onready var collision_shape:CollisionShape = $CollisionShape
 onready var collision_shape_origin:Position3D = $Meshes/CollisionOrigin
+onready var mutations_container:Spatial = $Mutations
+onready var mutations:Array = mutations_container.get_children()
 
 var navigation_points:PoolVector3Array = []
 # stuck check
 var navigation_stuck_duration:float = 0.0
 var last_position:Vector3 = Vector3.ZERO
 var total_movement:float = 0.0
-
 
 # [Override]
 func ready():

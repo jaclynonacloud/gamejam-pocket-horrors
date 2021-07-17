@@ -41,10 +41,10 @@ Battle with your pocket horror until you become the apex monster in the universe
         - [ ] Giant Worm - Teeth
         - [ ] Elementals (Ice, Fire, Underwater) - Elements
 - [ ] Basic Traits
-    - [ ] Add Species, Colour Traits to Horrors
-    - [ ] Add Growth Trait to Horrors (Determines Size)
-    - [ ] Add Mutation Traits to Horrors - placeholder
-    - [ ] Add Devotion Trait to Horrors (How Much They Like the Player)
+    - [x] Add Species Trait to Horrors
+    - [x] Add Growth Trait to Horrors (Determines Size) <- Just called size.
+    - [x] Add Mutation Traits to Horrors - placeholder
+    - [x] Add Devotion Trait to Horrors (How Much They Like the Player)
 - [ ] Mutations (Separated based on Complexity)
     - [ ] Add Stats to Player
         - [ ] Base Health, Base Defense

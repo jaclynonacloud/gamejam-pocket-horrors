@@ -8,9 +8,11 @@ extents = Vector3( 3.65247, 2.49976, 1 )
 
 [node name="Butterfly" instance=ExtResource( 1 )]
 key = "Butterfly"
+species = "SPECIES_BUTTERFLY"
+mutations = [  ]
 
 [node name="CollisionShape" parent="." index="0"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0 )
+transform = Transform( 0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5, 0, 1.9715, 0 )
 shape = SubResource( 1 )
 
 [node name="Butterfly" parent="Meshes" index="0" instance=ExtResource( 2 )]
