@@ -25,8 +25,9 @@ Battle with your pocket horror until you become the apex monster in the universe
         - [x] Handle Movement/Inputs
     - [x] Create Game Camera
         - [x] Handle Target Tracking
-    - [ ] Create Pocket Horrors
-        - [ ] Create Movement
+    - [x] Create Pocket Horrors
+        - [x] Create Movement
+        - [x] Create Idle Behaviour
 - [ ] World Generation
     - [ ] Create Biomes
     - [ ] Spawn Pocket Horrors
@@ -36,7 +37,7 @@ Battle with your pocket horror until you become the apex monster in the universe
     - [ ] Add Mutation Traits to Horrors
     - [ ] Add Devotion Trait to Horrors (How Much They Like the Player)
 - [ ] Horror Interactions
-    - [ ] Create Idle Behaviour
+    - [ ] Create Follow Behaviour
     - [ ] Create Chase Behaviour
     - [ ] Create Flee Behaviour
 - [ ] Fighting System
