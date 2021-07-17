@@ -21,8 +21,8 @@ Battle with your pocket horror until you become the apex monster in the universe
     - [x] Create World
         - [x] Create Navigation
         - [x] Create Obstacles
-    - [ ] Create Player
-        - [ ] Handle Movement/Inputs
+    - [x] Create Player
+        - [x] Handle Movement/Inputs
     - [ ] Create Game Camera
         - [ ] Handle Target Tracking
     - [ ] Create Pocket Horrors
