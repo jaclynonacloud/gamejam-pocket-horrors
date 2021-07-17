@@ -30,8 +30,7 @@ func physics_process(delta:float):
 	calculate_navigation(delta)
 	
 # [Override]
-func update_velocity(delta:float):
-	.update_velocity(delta)
+func calculate_movement(delta:float):
 	# move our horror based on velocity
 	var pos:Vector3 = translation.direction_to(navigation_points[0]) if navigation_points.size() > 0 else Vector3.ZERO
 	var vel:float = velocity.normalized().length()

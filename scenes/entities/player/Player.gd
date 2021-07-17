@@ -11,7 +11,7 @@ func process(delta:float):
 		desired_velocity = move_axis_v3 * self.speed
 	
 # [Override]
-func update_velocity(delta:float):
-	.update_velocity(delta)
+func calculate_movement(delta:float):
 	# move our player based on velocity
-	callv("move_and_slide", [velocity, Vector3.UP])
+	KinematicBody
+	callv("move_and_slide", [velocity, Vector3.UP, true])

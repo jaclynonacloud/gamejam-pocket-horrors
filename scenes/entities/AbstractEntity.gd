@@ -1,6 +1,7 @@
 extends PhysicsBody
 
 export var move_speed:float = 5.0
+export var gravity:float = 2.0
 export (float, 0.0, 1.0, 0.01) var move_slide:float = 0.35
 
 var speed:float = move_speed setget , get_speed
@@ -15,6 +16,8 @@ func _process(delta:float):
 		
 func _physics_process(delta:float):
 	update_velocity(delta)
+	apply_gravity(delta)
+	calculate_movement(delta)
 	physics_process(delta)
 
 # abstracts
@@ -25,6 +28,14 @@ func physics_process(delta:float): pass
 # Updates the entity velocity based on the desired velocity.
 func update_velocity(delta:float):
 	velocity = velocity.linear_interpolate(desired_velocity, move_slide)
+	
+# Applies gravity to the entity.
+func apply_gravity(delta:float):
+	velocity += Vector3.DOWN * gravity
+	
+# Moves the entity.
+func calculate_movement(delta:float):
+	translation = translation.move_toward(translation + velocity, self.speed * delta)
 		
 func get_speed():
 	return move_speed
