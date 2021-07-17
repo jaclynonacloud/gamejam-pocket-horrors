@@ -1,10 +1,9 @@
-[gd_scene load_steps=4 format=2]
+[gd_scene load_steps=3 format=2]
 
-[ext_resource path="res://graphics/game/entities/horror/idle.png" type="Texture" id=1]
 [ext_resource path="res://scenes/entities/horror/Horror.gd" type="Script" id=2]
 
 [sub_resource type="CylinderShape" id=1]
-radius = 0.5
+radius = 0.1
 height = 1.43387
 
 [node name="Horror" type="RigidBody" groups=[
@@ -12,12 +11,13 @@ height = 1.43387
 ]]
 script = ExtResource( 2 )
 move_speed = 8.0
-
-[node name="Sprite3D" type="Sprite3D" parent="."]
-centered = false
-offset = Vector2( -64, 0 )
-texture = ExtResource( 1 )
+key = "Horror"
 
 [node name="CollisionShape" type="CollisionShape" parent="."]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.719945, 0 )
 shape = SubResource( 1 )
+
+[node name="Meshes" type="Spatial" parent="."]
+transform = Transform( 0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5, 0, 0, 0 )
+
+[node name="CollisionOrigin" type="Position3D" parent="Meshes"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.607731, 0 )

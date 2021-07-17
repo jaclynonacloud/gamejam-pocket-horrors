@@ -1,0 +1,74 @@
+[gd_scene load_steps=3 format=2]
+
+[ext_resource path="res://globals/debug/Debug.gd" type="Script" id=1]
+
+[sub_resource type="GDScript" id=1]
+script/source = "extends TextureRect
+
+export var refresh_rate:float = 3.0
+
+var paths:Dictionary = {}
+var points:Array = []
+var screen_size:Vector2 = Vector2.ZERO
+var camera:Camera = null
+var timer:Timer = Timer.new()
+
+func _ready():
+	screen_size = get_viewport_rect().size
+	camera = get_viewport().get_camera()
+	
+	add_child(timer)
+	timer.wait_time = refresh_rate
+	timer.start()
+	timer.connect(\"timeout\", self, \"_timeout\")
+	
+func _timeout():
+	timer.start(0)
+	update()
+
+func _draw():
+	# clear the screen
+	draw_rect(Rect2(0, 0, screen_size.x, screen_size.y), Color.transparent)
+	# draw paths
+	for path in paths.values():
+		var last_pos:Vector3 = Vector3.INF
+		for pos in path:
+			var next_position:Vector2 = camera.unproject_position(pos)
+			draw_circle(next_position, 3, Color.red)
+			if last_pos != Vector3.INF:
+				var last_position:Vector2 = camera.unproject_position(last_pos)
+				draw_line(last_position, next_position, Color.red)
+			last_pos = pos
+	# draw points
+	for point in points:
+		var screen_position:Vector2 = camera.unproject_position(point[0])
+		draw_circle(screen_position, 2.0, point[1])
+
+
+func add_path(key:String, points:PoolVector3Array):
+	paths[key] = points
+	update()
+
+
+# Adds a temporary point.
+func add_point(point:Vector3, color:Color=Color.blue, duration:float=1.0):
+	var data:Array = [point, color]
+	points.append(data)
+	update()
+	yield(get_tree().create_timer(duration), \"timeout\")
+	points.erase(data)
+	update()
+"
+
+[node name="Debug" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource( 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ScreenDraw" type="TextureRect" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = SubResource( 1 )

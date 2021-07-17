@@ -1,11 +1,10 @@
-[gd_scene load_steps=11 format=2]
+[gd_scene load_steps=10 format=2]
 
 [ext_resource path="res://materials/DebugMaterial.tres" type="Material" id=1]
 [ext_resource path="res://scenes/objects/tree/Tree.tscn" type="PackedScene" id=2]
 [ext_resource path="res://scenes/Game.gd" type="Script" id=3]
 [ext_resource path="res://scenes/entities/player/Player.tscn" type="PackedScene" id=4]
 [ext_resource path="res://scenes/objects/game_camera/GameCamera.tscn" type="PackedScene" id=5]
-[ext_resource path="res://scenes/entities/horror/Horror.tscn" type="PackedScene" id=6]
 [ext_resource path="res://scenes/entities/horror/blob/Blob.tscn" type="PackedScene" id=7]
 [ext_resource path="res://scenes/entities/horror/butterfly/Butterfly.tscn" type="PackedScene" id=8]
 
@@ -121,14 +120,25 @@ move_slide = 0.25
 [node name="GameCamera" parent="." instance=ExtResource( 5 )]
 target_path = NodePath("../Player")
 
-[node name="Horror" parent="." instance=ExtResource( 6 )]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 4.83118, 0, 1.00128 )
-navigation_path = NodePath("../Navigation")
-
 [node name="Blob" parent="." instance=ExtResource( 7 )]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -3.85136, 0, -3.87205 )
+size = 0.7
+navigation_path = NodePath("../Navigation")
+navigation_point_margin = 0.343
+
+[node name="Blob2" parent="." instance=ExtResource( 7 )]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 14.1305, -9.53674e-07, -2.20151 )
 navigation_path = NodePath("../Navigation")
 
-[node name="Butterfly" parent="." instance=ExtResource( 8 )]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 21.65, 3.99699, -18.7 )
+[node name="Blob3" parent="." instance=ExtResource( 7 )]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 5.43862, -9.53674e-07, 6.85289 )
+size = 1.3
 navigation_path = NodePath("../Navigation")
+navigation_point_margin = 2.197
+
+[node name="Butterfly" parent="." instance=ExtResource( 8 )]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 21.65, 4.51116, -18.7 )
+move_speed = 20.0
+size = 0.7
+navigation_path = NodePath("../Navigation")
+navigation_point_margin = 0.343

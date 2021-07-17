@@ -13,5 +13,4 @@ func process(delta:float):
 # [Override]
 func calculate_movement(delta:float):
 	# move our player based on velocity
-	KinematicBody
-	callv("move_and_slide", [velocity, Vector3.UP, true])
+	callv("move_and_slide", [velocity, Vector3.UP, true, 4, 0.9])

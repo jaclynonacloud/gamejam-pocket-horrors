@@ -31,8 +31,8 @@ Battle with your pocket horror until you become the apex monster in the universe
 - [ ] World Generation
     - [ ] Create Biomes
     - [ ] Spawn Pocket Horrors
-        - [ ] Easy Blob - No Mutation
-        - [ ] Flying/Butterfly - Wings
+        - [x] Easy Blob - No Mutation
+        - [x] Flying/Butterfly - Wings
         - [ ] Deerlike - Antlers
         - [ ] Water Mutant - Gills/Fins
         - [ ] Eye Creature - Eyes
@@ -68,6 +68,8 @@ Battle with your pocket horror until you become the apex monster in the universe
     - [ ] Create Pause Menu
     - [ ] Create Active Horror Details Panel
     - [ ] Create Engaged Horrors List Panel
+- [ ] End
+    - [ ] Summon Eldritch God (Let's Use Loop Hero-like Progression)
 
 ### Stretch Milestones
 - [ ] Custom Settings
