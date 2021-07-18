@@ -37,6 +37,7 @@ func ready():
 	next_behaviour()
 	
 	last_position = translation
+	change_collider_size()
 
 # [Override]
 func process(delta:float):
@@ -152,10 +153,22 @@ func navigation_complete():
 	total_movement = 0.0
 	navigation_stuck_duration = 0.0
 	
+	# pick a random idle
+	yield(get_tree().create_timer(rand_range(0.2, 1.2)), "timeout")
+	
 	# start next behaviour
 	next_behaviour()
 	
 	emit_signal("navigation_completed")
+	
+	
+# Changes the collider size.  Only do this ONCE it causes glitchiness.
+func change_collider_size():
+	var sc:Vector3 = Vector3.ONE * max(0.01, size - 0.5)
+	var cc:Spatial = collision_shape if collision_shape != null else get_node("CollisionShape")
+	cc.scale = sc
+	var col_origin:Spatial = collision_shape_origin if collision_shape_origin != null else get_node("Meshes/CollisionOrigin")
+	cc.global_transform.origin = col_origin.global_transform.origin
 
 func get_key():
 	if key == "": return name
@@ -171,10 +184,6 @@ func set_size(value:float):
 	var sc:Vector3 = Vector3.ONE * max(0.01, size - 0.5)
 	var mc:Spatial = meshes_container if meshes_container != null else get_node("Meshes")
 	mc.scale = sc
-	var cc:Spatial = collision_shape if collision_shape != null else get_node("CollisionShape")
-	cc.scale = sc
-	var col_origin:Spatial = collision_shape_origin if collision_shape_origin != null else get_node("Meshes/CollisionOrigin")
-	cc.global_transform.origin = col_origin.global_transform.origin
 
 func get_navigation_point_margin():
-	return navigation_point_margin * size
+	return navigation_point_margin

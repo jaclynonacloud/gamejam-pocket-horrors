@@ -1,0 +1,18 @@
+[gd_resource type="Resource" load_steps=2 format=2]
+
+[ext_resource path="res://custom/resources/stats/StatsResource.gd" type="Script" id=1]
+
+[resource]
+script = ExtResource( 1 )
+stat_max_health = 0.0
+stat_max_defense = 0.0
+stat_max_strength = 0.0
+stat_max_speed = 2.0
+stat_damage = 0.0
+stat_accuracy = 0.3
+stat_bleed = 0.0
+stat_stun = 0.0
+stat_resistance_cold = -1.0
+stat_resistance_fire = -4.0
+stat_resistance_ice = -0.2
+stat_resistance_underwater = -8.0

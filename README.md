@@ -38,19 +38,19 @@ Battle with your pocket horror until you become the apex monster in the universe
         - [ ] Eye Creature - Eyes
         - [ ] Gore Creature - Gore
         - [ ] Tentacle Creature - Tentacles
+        - [ ] Frog - Legs
         - [ ] Giant Worm - Teeth
         - [ ] Elementals (Ice, Fire, Underwater) - Elements
-- [ ] Basic Traits
+- [x] Basic Traits
     - [x] Add Species Trait to Horrors
     - [x] Add Growth Trait to Horrors (Determines Size) <- Just called size.
     - [x] Add Mutation Traits to Horrors - placeholder
     - [x] Add Devotion Trait to Horrors (How Much They Like the Player)
-- [ ] Mutations (Separated based on Complexity)
-    - [ ] Add Stats to Player
-        - [ ] Base Health, Base Defense
-        - [ ] Damage, Accuracy, Resistance (Fire, Cold, Water, Underwater)
-    - [ ] Create Mutation Trait Base (Lifetime, Power, Stats)
-    - [ ] Create
+- [x] Mutations (Separated based on Complexity)
+    - [x] Add Stats to Player
+        - [x] Base Health, Base Defense
+        - [x] Damage, Accuracy, Resistance (Fire, Cold, Water, Underwater)
+    - [x] Create Mutation Trait Base (Lifetime, Power, Stats)
 - [ ] Horror Interactions
     - [ ] Create Follow Behaviour
     - [ ] Create Chase Behaviour
@@ -61,6 +61,8 @@ Battle with your pocket horror until you become the apex monster in the universe
         - [ ] Mutation Check -> Determines if Enemy Horror will Flee
         - [ ] Engagement
         - [ ] Resolution
+            - [ ] Absorb Horror -> Chance of Mutations
+                - [ ] Add Mutation Absorption Chance
     - [ ] Verify Stats on Player and Horrors
     - [ ] Create Attacks
 - [ ] Interfaces
