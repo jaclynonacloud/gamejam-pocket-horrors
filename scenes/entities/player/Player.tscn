@@ -1,4 +1,4 @@
-[gd_scene load_steps=6 format=2]
+[gd_scene load_steps=7 format=2]
 
 [ext_resource path="res://graphics/game/entities/player/idle.png" type="Texture" id=1]
 [ext_resource path="res://scenes/entities/player/Player.gd" type="Script" id=2]
@@ -7,6 +7,9 @@
 
 [sub_resource type="CapsuleShape" id=1]
 radius = 0.643737
+
+[sub_resource type="SphereShape" id=2]
+radius = 22.1199
 
 [node name="Player" type="KinematicBody" groups=[
 "player",
@@ -26,3 +29,11 @@ shape = SubResource( 1 )
 [node name="Mutations" type="Spatial" parent="."]
 
 [node name="WingsMutation" parent="Mutations" instance=ExtResource( 4 )]
+
+[node name="HorrorArea" type="Area" parent="."]
+monitorable = false
+collision_layer = 2
+collision_mask = 2
+
+[node name="CollisionShape" type="CollisionShape" parent="HorrorArea"]
+shape = SubResource( 2 )

@@ -1,4 +1,4 @@
-tool
+#tool
 extends "res://scenes/entities/AbstractEntity.gd"
 
 signal navigation_completed()
@@ -16,6 +16,11 @@ export var navigation_point_margin:float = 1.0 setget , get_navigation_point_mar
 export var stuck_check_interval:float = NAVIGATION_STUCK_CHECK_INTERVAL
 export (float, 0.0, 1.0, 0.01) var devotion:float = 0.0 # how devoted a species is to the player
 
+export var chase_speed:float = 20.0
+export var chase_distance:float = 3.0 setget , get_chase_distance # how close the player should be before chasing is initialized
+export var chase_interest_in_seconds:float = 1.0 # how long a horror will be willing to chase the player for
+export var chase_check_interval:float = 0.5 # how often we will update the chase target
+
 onready var navigation:Navigation = get_node_or_null(navigation_path)
 onready var meshes_container:Spatial = $Meshes
 onready var collision_shape:CollisionShape = $CollisionShape
@@ -29,8 +34,54 @@ var navigation_stuck_duration:float = 0.0
 var last_position:Vector3 = Vector3.ZERO
 var total_movement:float = 0.0
 
+var behaviour_timer:Timer = Timer.new()
+
+# chase check
+var chase_target:Spatial = null
+var chase_exhaustion:float = -1.0
+var is_chasing:bool = false setget , get_is_chasing
+
+# Calculates a horror's chase exhaustion based on their closeness to the player, and how interested they are in chasing.
+func calculate_chase_exhaustion(delta:float):
+	if chase_target != null && chase_exhaustion >= 0.0:
+		chase_exhaustion += delta
+		# low interest means we are close
+		if chase_exhaustion > chase_interest_in_seconds:
+			stop_chasing()
+	
+# Chase the player! (if we are in range)
+func chase(target:Spatial):
+	if chase_target == target && self.is_chasing: return # don't bother if we are already chasing!
+	var distance:float = target.global_transform.origin.distance_to(global_transform.origin)
+	# start chasing if in distance
+	if distance <= self.chase_distance:
+		behaviour_timer.wait_time = chase_check_interval
+		chase_target = target
+		chase_exhaustion = 0.0
+		navigate(chase_target.global_transform.origin)
+		behaviour_timer.one_shot = false
+		behaviour_timer.start()
+		
+# Stops chasing the target.
+func stop_chasing():
+	chase_target = null
+	chase_exhaustion = -1.0
+	printerr("Done chasing")
+	
+func get_is_chasing():
+	return chase_exhaustion >= 0.0
+	
+# Called by the behaviour timer.
+func _update_behaviour():
+	if self.is_chasing:
+		printerr("Update chase target")
+		navigate(chase_target.global_transform.origin)
+
 # [Override]
 func ready():
+	add_child(behaviour_timer)
+	behaviour_timer.connect("timeout", self, "_update_behaviour")
+	
 	self.size = size
 	yield(get_tree(), "idle_frame")
 	# start the next behaviour
@@ -51,8 +102,9 @@ func process(delta:float):
 # [Override]
 func physics_process(delta:float):
 	if Engine.editor_hint: return
-	
 	.physics_process(delta)
+	
+	calculate_chase_exhaustion(delta)
 	calculate_navigation(delta)
 	update_stuck_check()
 	
@@ -67,6 +119,8 @@ func calculate_movement(delta:float):
 	
 # Determines next desired behaviour.
 func next_behaviour():
+	# don't idle if chasing
+	if self.is_chasing: return
 	# picks a new location to travel to
 	randomize()
 	var offset_range:float = 5.0
@@ -83,9 +137,12 @@ func next_behaviour():
 # Uses the Navigation node to navigate to a specific position.
 func navigate(position:Vector3):
 	if navigation == null: return
+	print_stack()
 	# find our desired position on the navigation
 	navigation_points = optimize_path(navigation.get_simple_path(translation, position))
-	Globals.debug.add_path(str(get_instance_id()), navigation_points)
+	var color:Color = Color.blue
+	if self.is_chasing: color = Color.greenyellow
+	Globals.debug.add_path(str(get_instance_id()), navigation_points, color)
 	
 # Checks if our horror is currently stuck with their navigation.
 func check_if_stuck():
@@ -169,6 +226,10 @@ func change_collider_size():
 	cc.scale = sc
 	var col_origin:Spatial = collision_shape_origin if collision_shape_origin != null else get_node("Meshes/CollisionOrigin")
 	cc.global_transform.origin = col_origin.global_transform.origin
+	
+# Gets the size multiplier.
+func get_size_multiplier():
+	return ((size / MAX_SIZE) + 0.3)
 
 func get_key():
 	if key == "": return name
@@ -176,7 +237,8 @@ func get_key():
 
 # [Override]
 func get_speed():
-	return move_speed * ((size / MAX_SIZE) + 0.3)
+	if self.is_chasing: return chase_speed * get_size_multiplier()
+	return move_speed * get_size_multiplier()
 
 
 func set_size(value:float):
@@ -184,6 +246,10 @@ func set_size(value:float):
 	var sc:Vector3 = Vector3.ONE * max(0.01, size - 0.5)
 	var mc:Spatial = meshes_container if meshes_container != null else get_node("Meshes")
 	mc.scale = sc
+	
+func get_chase_distance():
+	return chase_distance * get_size_multiplier()
+	
 
 func get_navigation_point_margin():
 	return navigation_point_margin

@@ -23,17 +23,4 @@ transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.41044, 0 )
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.943, 0 )
 
 [node name="WingsMutation" parent="Mutations" index="0" instance=ExtResource( 3 )]
-base_stats = {
-"STAT_ACCURACY": 0.3,
-"STAT_BLEED": 0.0,
-"STAT_DAMAGE": 0.0,
-"STAT_MAX_DEFENSE": 0.0,
-"STAT_MAX_HEALTH": 0.0,
-"STAT_MAX_SPEED": 2.0,
-"STAT_MAX_STRENGTH": 0.0,
-"STAT_RESISTANCE_COLD": -1.0,
-"STAT_RESISTANCE_FIRE": -4.0,
-"STAT_RESISTANCE_ICE": -0.2,
-"STAT_RESISTANCE_UNDERWATER": -8.0,
-"STAT_STUN": 0.0
-}
+base_stats = null

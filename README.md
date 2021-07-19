@@ -53,7 +53,7 @@ Battle with your pocket horror until you become the apex monster in the universe
     - [x] Create Mutation Trait Base (Lifetime, Power, Stats)
 - [ ] Horror Interactions
     - [ ] Create Follow Behaviour
-    - [ ] Create Chase Behaviour
+    - [x] Create Chase Behaviour
     - [ ] Create Flee Behaviour
 - [ ] Fighting System
     - [ ] Create Fighting Sequence

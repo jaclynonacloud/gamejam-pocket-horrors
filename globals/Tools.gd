@@ -1,5 +1,13 @@
 extends Node
 
+# Prints an array of node names.
+func print_node_names(nodes:Array):
+	var result:Array = []
+	for node in nodes:
+		if node != null:
+			result.append(node.name)
+	print(PoolStringArray(result).join(", "))
+
 # Gets stats from a stats resource.  Requires the property name to begin with stat_.
 func get_stats_from(stat_resource:Resource):
 	if stat_resource == null: return {}
