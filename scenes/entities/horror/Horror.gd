@@ -17,16 +17,16 @@ export var stuck_check_interval:float = NAVIGATION_STUCK_CHECK_INTERVAL
 export (float, 0.0, 1.0, 0.01) var devotion:float = 0.0 # how devoted a species is to the player
 
 export var chase_speed:float = 20.0
-export var chase_distance:float = 3.0 setget , get_chase_distance # how close the player should be before chasing is initialized
+export var chase_distance:float = 30.0 setget , get_chase_distance # how close the player should be before chasing is initialized
 export var chase_interest_in_seconds:float = 1.0 # how long a horror will be willing to chase the player for
 export var chase_check_interval:float = 0.5 # how often we will update the chase target
+
+export var fight_distance:float = 20.0 setget , get_fight_distance # how close the player should be before they've initiated a fight!
 
 onready var navigation:Navigation = get_node_or_null(navigation_path)
 onready var meshes_container:Spatial = $Meshes
 onready var collision_shape:CollisionShape = $CollisionShape
 onready var collision_shape_origin:Position3D = $Meshes/CollisionOrigin
-onready var mutations_container:Spatial = $Mutations
-onready var mutations:Array = mutations_container.get_children()
 
 var navigation_points:PoolVector3Array = []
 # stuck check
@@ -41,40 +41,14 @@ var chase_target:Spatial = null
 var chase_exhaustion:float = -1.0
 var is_chasing:bool = false setget , get_is_chasing
 
-# Calculates a horror's chase exhaustion based on their closeness to the player, and how interested they are in chasing.
-func calculate_chase_exhaustion(delta:float):
-	if chase_target != null && chase_exhaustion >= 0.0:
-		chase_exhaustion += delta
-		# low interest means we are close
-		if chase_exhaustion > chase_interest_in_seconds:
-			stop_chasing()
-	
-# Chase the player! (if we are in range)
-func chase(target:Spatial):
-	if chase_target == target && self.is_chasing: return # don't bother if we are already chasing!
-	var distance:float = target.global_transform.origin.distance_to(global_transform.origin)
-	# start chasing if in distance
-	if distance <= self.chase_distance:
-		behaviour_timer.wait_time = chase_check_interval
-		chase_target = target
-		chase_exhaustion = 0.0
-		navigate(chase_target.global_transform.origin)
-		behaviour_timer.one_shot = false
-		behaviour_timer.start()
-		
-# Stops chasing the target.
-func stop_chasing():
-	chase_target = null
-	chase_exhaustion = -1.0
-	printerr("Done chasing")
-	
-func get_is_chasing():
-	return chase_exhaustion >= 0.0
+# fighting check
+var is_fighting:bool = false setget , get_is_fighting
+var fight_target:Spatial = null
+var fight_position:Vector3 = Vector3.ZERO
 	
 # Called by the behaviour timer.
 func _update_behaviour():
 	if self.is_chasing:
-		printerr("Update chase target")
 		navigate(chase_target.global_transform.origin)
 
 # [Override]
@@ -121,6 +95,8 @@ func calculate_movement(delta:float):
 func next_behaviour():
 	# don't idle if chasing
 	if self.is_chasing: return
+	# don't idle if fighting -- at least not like this
+	elif self.is_fighting: return
 	# picks a new location to travel to
 	randomize()
 	var offset_range:float = 5.0
@@ -137,12 +113,65 @@ func next_behaviour():
 # Uses the Navigation node to navigate to a specific position.
 func navigate(position:Vector3):
 	if navigation == null: return
-	print_stack()
 	# find our desired position on the navigation
 	navigation_points = optimize_path(navigation.get_simple_path(translation, position))
 	var color:Color = Color.blue
 	if self.is_chasing: color = Color.greenyellow
+	if self.is_fighting: color = Color.red
 	Globals.debug.add_path(str(get_instance_id()), navigation_points, color)
+	
+# Calculates a horror's chase exhaustion based on their closeness to the player, and how interested they are in chasing.
+func calculate_chase_exhaustion(delta:float):
+	if chase_target != null && chase_exhaustion >= 0.0:
+		chase_exhaustion += delta
+		# low interest means we are close
+		if chase_exhaustion > chase_interest_in_seconds:
+			stop_chasing()
+	
+# Chase the player! (if we are in range)
+func chase(target:Spatial):
+	if chase_target == target && self.is_chasing: return # don't bother if we are already chasing!
+	var distance:float = target.global_transform.origin.distance_to(global_transform.origin)
+	# start chasing if in distance
+	if distance <= self.chase_distance:
+		behaviour_timer.wait_time = chase_check_interval
+		chase_target = target
+		chase_exhaustion = 0.0
+		navigate(chase_target.global_transform.origin)
+		behaviour_timer.one_shot = false
+		behaviour_timer.start()
+		
+# Stops chasing the target.
+func stop_chasing():
+	chase_target = null
+	chase_exhaustion = -1.0
+	print("Done chasing")
+	
+	
+# Updates the horror behaviour.
+func update_behaviour(target:Spatial):
+	if self.is_fighting: return
+	if fight(target):
+		target.fight_targets.append(self)
+		target.fight_targets = target.fight_targets # trigger setget
+		# if we were the first fight target, pitch the camera
+		if target.fight_targets.size() == 1:
+			Globals.game_camera.fight_camera()
+	else:
+		chase(target)
+	
+	
+func fight(target:Spatial) -> bool:
+	if fight_target != null: return false # we don't want to fight anyone else until the current fight is resolved
+	var distance:float = target.global_transform.origin.distance_to(global_transform.origin)
+	# start fighting if in distance
+	if distance <= self.fight_distance:
+		fight_target = target
+		fight_position = target.global_transform.origin.linear_interpolate(global_transform.origin, 0.5)
+		stop_chasing()
+		navigate(fight_position)
+		return true
+	return false
 	
 # Checks if our horror is currently stuck with their navigation.
 func check_if_stuck():
@@ -239,6 +268,13 @@ func get_key():
 func get_speed():
 	if self.is_chasing: return chase_speed * get_size_multiplier()
 	return move_speed * get_size_multiplier()
+	
+# [Override]
+func get_attacks():
+	var results:Dictionary = .get_attacks()
+	for mutation in mutations:
+		results[mutation.attack_key] = {  "power": mutation.attack_power, "cooldown": mutation.attack_cooldown, "type": mutation.get_mutation_readable() }
+	return results
 
 
 func set_size(value:float):
@@ -249,6 +285,15 @@ func set_size(value:float):
 	
 func get_chase_distance():
 	return chase_distance * get_size_multiplier()
+	
+func get_fight_distance():
+	return fight_distance * get_size_multiplier()
+	
+func get_is_chasing():
+	return chase_exhaustion >= 0.0
+	
+func get_is_fighting():
+	return fight_target != null
 	
 
 func get_navigation_point_margin():

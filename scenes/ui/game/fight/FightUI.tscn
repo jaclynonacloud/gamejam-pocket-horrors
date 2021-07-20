@@ -1,0 +1,66 @@
+[gd_scene load_steps=4 format=2]
+
+[ext_resource path="res://scenes/ui/game/fight/components/attack_item/AttackItem.tscn" type="PackedScene" id=1]
+[ext_resource path="res://scenes/ui/game/fight/FightUI.gd" type="Script" id=2]
+[ext_resource path="res://scenes/ui/game/fight/components/horror_item/HorrorItem.tscn" type="PackedScene" id=3]
+
+[node name="FightUI" type="HBoxContainer"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+script = ExtResource( 2 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+horrors_list_container_path = NodePath("HorrorsContainer/HorrorsList")
+attacks_list_container_path = NodePath("AttacksContainer/AttacksList")
+
+[node name="HorrorsContainer" type="MarginContainer" parent="."]
+margin_right = 362.0
+margin_bottom = 600.0
+mouse_filter = 2
+size_flags_horizontal = 3
+custom_constants/margin_right = 35
+custom_constants/margin_top = 15
+custom_constants/margin_left = 35
+custom_constants/margin_bottom = 15
+
+[node name="HorrorsList" type="VBoxContainer" parent="HorrorsContainer"]
+margin_left = 35.0
+margin_top = 15.0
+margin_right = 327.0
+margin_bottom = 585.0
+mouse_filter = 2
+
+[node name="HorrorItem" parent="HorrorsContainer/HorrorsList" instance=ExtResource( 3 )]
+margin_bottom = 62.0
+
+[node name="Buffer" type="MarginContainer" parent="."]
+margin_left = 366.0
+margin_right = 657.0
+margin_bottom = 600.0
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.8
+
+[node name="AttacksContainer" type="MarginContainer" parent="."]
+margin_left = 661.0
+margin_right = 1024.0
+margin_bottom = 600.0
+mouse_filter = 2
+size_flags_horizontal = 3
+custom_constants/margin_right = 35
+custom_constants/margin_top = 15
+custom_constants/margin_left = 35
+custom_constants/margin_bottom = 15
+
+[node name="AttacksList" type="VBoxContainer" parent="AttacksContainer"]
+margin_left = 35.0
+margin_top = 15.0
+margin_right = 328.0
+margin_bottom = 585.0
+mouse_filter = 2
+alignment = 2
+
+[node name="AttackItem" parent="AttacksContainer/AttacksList" instance=ExtResource( 1 )]
+margin_top = 536.0
+margin_bottom = 570.0

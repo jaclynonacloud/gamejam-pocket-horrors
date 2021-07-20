@@ -1,26 +1,40 @@
 extends "res://scenes/entities/AbstractEntity.gd"
 
 export var base_stats:Resource
-
-onready var mutations_container:Node = $Mutations
-onready var mutations:Array = mutations_container.get_children()
 onready var horror_area:Area = $HorrorArea
 
 var stats:Dictionary = {} setget , get_stats
 var size:float = 1.0 # TODO: implement this my dude!
 var nearby_horrors:Array = []
 
+# fighting stuffs
+var fight_targets:Array = [] setget set_fight_targets
+
+var can_move:bool = true setget , get_can_move
+
 func _nearby_horror_updated(body:Node, entered:bool):
 	if entered:
 		nearby_horrors.append(body)
 	else:
 		nearby_horrors.erase(body)
-		
-	Tools.print_node_names(nearby_horrors)
 	
 	
 func _init():
 	Globals.player = self
+	
+	
+# Attacks all fight targets.
+func attack(attack_key:String):
+	print("Attacking with: %s" % attack_key)
+	var attack = self.attacks.get(attack_key, null)
+	if attack != null:
+		var strength:float = attack.power + self.base_attack_power
+		# lessen the power by the amount of engaged horrors
+		strength = strength * max(0.3, strength / fight_targets.size())
+		print("Strength: %s" % strength)
+		
+		for horror in fight_targets:
+			horror.take_damage(strength)
 	
 
 func ready():
@@ -41,13 +55,17 @@ func process(delta:float):
 		desired_velocity = Vector3.ZERO
 	# otherwise, update it!
 	else:
-		var move_axis_v3:Vector3 = Vector3(Inputs.move_axis.x, 0, Inputs.move_axis.y)
-		desired_velocity = move_axis_v3 * self.speed
+		if self.can_move:
+			var move_axis_v3:Vector3 = Vector3(Inputs.move_axis.x, 0, Inputs.move_axis.y)
+			desired_velocity = move_axis_v3 * self.speed
+		else:
+			desired_velocity = Vector3.ZERO
 		
 		
 	# update nearby horrors
 	for horror in nearby_horrors:
-		horror.chase(self)
+		# the horrors themselves will decide whether they want to engage
+		horror.update_behaviour(self)
 	
 # [Override]
 func calculate_movement(delta:float):
@@ -63,6 +81,12 @@ func pulse_horror_area():
 	yield(get_tree(), "idle_frame")
 	col.disabled = false
 
+# [Override]
+func get_attacks():
+	var results:Dictionary = .get_attacks()
+	for mutation in mutations:
+		results[mutation.attack_key] = {  "power": mutation.attack_power, "cooldown": mutation.attack_cooldown, "type": mutation.get_mutation_readable() }
+	return results
 
 func get_stats():
 	# get base stats
@@ -72,3 +96,12 @@ func get_stats():
 		for mutation in mutations:
 			results = Tools.add_float_dictionaries(results, mutation.stats)
 	return results
+
+func get_can_move():
+	return fight_targets.size() <= 0
+
+func set_fight_targets(value:Array):
+	fight_targets = value
+	# start fight ui if it is not already open
+	if !Globals.game_ui.fight.start_fight(self.attacks, fight_targets):
+		Globals.game_ui.fight.update_horrors(fight_targets)

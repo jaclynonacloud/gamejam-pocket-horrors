@@ -57,14 +57,14 @@ Battle with your pocket horror until you become the apex monster in the universe
     - [ ] Create Flee Behaviour
 - [ ] Fighting System
     - [ ] Create Fighting Sequence
-        - [ ] Proximity Check
+        - [x] Proximity Check
         - [ ] Mutation Check -> Determines if Enemy Horror will Flee
-        - [ ] Engagement
+        - [x] Engagement
         - [ ] Resolution
             - [ ] Absorb Horror -> Chance of Mutations
                 - [ ] Add Mutation Absorption Chance
-    - [ ] Verify Stats on Player and Horrors
-    - [ ] Create Attacks
+    - [x] Verify Stats on Player and Horrors
+    - [x] Create Attacks
 - [ ] Interfaces
     - [ ] Create Main Menu
     - [ ] Create Pause Menu
@@ -77,12 +77,9 @@ Battle with your pocket horror until you become the apex monster in the universe
 - [ ] Custom Settings
     - [ ] Add Custom Keybinding
     - [ ] Add Volume Control
-- [ ] Hunger Trait
-    - [ ] Add Hunger Traits to Horrors (And What They Like to Eat)
-- [ ] Stress Trait
-    - [ ] Add Stress Trait to Horrors (Will Attack Player if Too Stressed)
-- [ ] Task Systems
-    - [ ] Create Tasks for the Player and their Pocket Horror to Complete
+- [ ] Task/Achievement Systems
+    - [ ] Create Tasks/Achievements for the Player and their Pocket Horror to Complete
+        - [ ] Create shrines that demo mutation combos or goals that will provide a boost toward Eldritch God summon.
 - [ ] Difficulty Scaling
 - [ ] Random World Generation
     - [ ] Randomly Generates the World and Biomes

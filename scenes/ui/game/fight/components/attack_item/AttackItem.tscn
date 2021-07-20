@@ -1,0 +1,62 @@
+[gd_scene load_steps=4 format=2]
+
+[ext_resource path="res://graphics/ui/shared/8x8.png" type="Texture" id=1]
+[ext_resource path="res://scenes/ui/game/fight/components/attack_item/AttackItem.gd" type="Script" id=2]
+
+[sub_resource type="StyleBoxFlat" id=1]
+bg_color = Color( 0.109804, 0.109804, 0.109804, 1 )
+
+[node name="AttackItem" type="PanelContainer"]
+margin_right = 293.0
+margin_bottom = 34.0
+focus_mode = 2
+mouse_default_cursor_shape = 2
+custom_styles/panel = SubResource( 1 )
+script = ExtResource( 2 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+cooldown_node_path = NodePath("CooldownProgress")
+readable_node_path = NodePath("AttackDataContainer/HBoxContainer/Readable")
+type_node_path = NodePath("AttackDataContainer/HBoxContainer/Type")
+
+[node name="CooldownProgress" type="TextureProgress" parent="."]
+margin_right = 293.0
+margin_bottom = 34.0
+mouse_filter = 2
+size_flags_horizontal = 3
+value = 50.0
+texture_progress = ExtResource( 1 )
+tint_progress = Color( 0.211765, 0.211765, 0.211765, 1 )
+nine_patch_stretch = true
+
+[node name="AttackDataContainer" type="MarginContainer" parent="."]
+margin_right = 293.0
+margin_bottom = 34.0
+mouse_filter = 2
+custom_constants/margin_right = 15
+custom_constants/margin_top = 10
+custom_constants/margin_left = 15
+custom_constants/margin_bottom = 10
+
+[node name="HBoxContainer" type="HBoxContainer" parent="AttackDataContainer"]
+margin_left = 15.0
+margin_top = 10.0
+margin_right = 278.0
+margin_bottom = 24.0
+
+[node name="Readable" type="Label" parent="AttackDataContainer/HBoxContainer"]
+margin_right = 129.0
+margin_bottom = 14.0
+size_flags_horizontal = 3
+text = "ATTACK_SLAP"
+autowrap = true
+
+[node name="Type" type="Label" parent="AttackDataContainer/HBoxContainer"]
+margin_left = 133.0
+margin_right = 263.0
+margin_bottom = 14.0
+size_flags_horizontal = 3
+custom_colors/font_color = Color( 0.631373, 0.631373, 0.631373, 1 )
+text = "TYPE"
+align = 2

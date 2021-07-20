@@ -17,13 +17,23 @@ enum MutationTypes {
 
 export var key:String = "" setget , get_key
 export var readable:String = ""
-export (MutationTypes, FLAGS) var mutation_type:int = 0
+export (MutationTypes) var mutation_type:int = 0
 export var lifetime:int = 10 # how many mutation cycles the mutation lasts before it disappears
 export var power:float = 1.0 setget , get_power # the multiplicity of how powerful this mutation is
 
 export var base_stats:Resource
 
+export var attack_key:String = ""
+export var attack_power:float = 1.0 setget , get_attack_power
+export var attack_cooldown:float = 2.0
+
 var stats:Dictionary = {} setget , get_stats
+
+
+# Gets the readable mutation type.
+func get_mutation_readable():
+	match mutation_type:
+		MutationTypes.Wings: return "TYPE_WINGS"
 
 
 func get_key():
@@ -33,6 +43,9 @@ func get_key():
 func get_power():
 	var size:float = get_parent().get_parent().size
 	return power * size
+	
+func get_attack_power():
+	return attack_power * self.power
 	
 	
 func get_stats():
