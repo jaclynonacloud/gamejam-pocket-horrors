@@ -9,6 +9,7 @@ var nearby_horrors:Array = []
 
 # fighting stuffs
 var fight_targets:Array = [] setget set_fight_targets
+var killed_targets:Array = []
 
 var can_move:bool = true setget , get_can_move
 
@@ -34,8 +35,45 @@ func attack(attack_key:String):
 		print("Strength: %s" % strength)
 		
 		for horror in fight_targets:
-			horror.take_damage(strength)
+			if !horror.take_damage(strength):
+				print("Kill me softly!")
+				# add horror to killed targets, so we can do fight finish when done
+				killed_targets.append(horror)
+				
+		# check to see if we finished the fight!
+		var has_targets_left:bool = false
+		for horror in fight_targets:
+			if !killed_targets.has(horror):
+				has_targets_left = true
+				break
+				
+		if !has_targets_left:
+			finish_fight()
+			
+func finish_fight():
+	print("Finish fight!!")
+	# go through all of our killed targets, and absorb them
+	var all_mutations:Array = []
+	for horror in killed_targets:
+		var mutes = horror.demutate()
+		all_mutations.append_array(mutes)
+		
+	# add all of the new mutations to our player
+	for mute in all_mutations:
+		mute.get_parent().remove_child(mute)
+		mutations_container.add_child(mute)
+		mutations.append(mute)
 	
+	# rot all the horrors
+	for horror in killed_targets:
+		horror.rot()
+		
+		
+	# hide fight ui
+	Globals.game_ui.fight.end_fight()
+		
+	fight_targets = []
+	killed_targets = []
 
 func ready():
 	.ready()

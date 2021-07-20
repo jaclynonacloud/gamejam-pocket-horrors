@@ -53,11 +53,16 @@ func calculate_movement(delta:float):
 	
 	
 func attack(key:String): pass
-func take_damage(amount:float):
+
+# The entity takes damage!  Will return false if they hit 0.0, meaning they are dead.
+func take_damage(amount:float) -> bool:
 	health = max(0.0, health - amount)
 	
 	if health == 0.0:
 		print("We're DEAD!!")
+		return false
+		
+	return true
 		
 func get_speed():
 	return move_speed

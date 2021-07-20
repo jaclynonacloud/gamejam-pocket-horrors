@@ -173,6 +173,27 @@ func fight(target:Spatial) -> bool:
 		return true
 	return false
 	
+	
+# Passes on mutations to player
+func demutate():
+	var mutes:Array = mutations.duplicate(true)
+	mutes.shuffle()
+	
+	var results:Array = []
+	# go through the list of mutations, and pass on any that are picked up
+	var chance:float = rand_range(0.0, 1.0)
+	for mut in mutes:
+		if mut.chance > chance:
+			results.append(mut)
+			
+	return results
+	
+# Plays the rotting animation
+func rot():
+	# remove the debug path
+	Globals.debug.remove_path(str(get_instance_id()))
+	queue_free()
+	
 # Checks if our horror is currently stuck with their navigation.
 func check_if_stuck():
 	# check to see if we've moved enough since last check

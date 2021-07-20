@@ -20,6 +20,7 @@ export var readable:String = ""
 export (MutationTypes) var mutation_type:int = 0
 export var lifetime:int = 10 # how many mutation cycles the mutation lasts before it disappears
 export var power:float = 1.0 setget , get_power # the multiplicity of how powerful this mutation is
+export (float, 0.0, 1.0, 0.01) var chance:float = 1.0 # chances of getting mutation from drop
 
 export var base_stats:Resource
 

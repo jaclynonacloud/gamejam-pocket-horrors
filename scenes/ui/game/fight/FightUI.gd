@@ -73,6 +73,10 @@ func _process(delta:float):
 	for i in range(attacks_data.keys().size()):
 		var item = attacks_list_container.get_child(i)
 		var data = attacks_data[attacks_data.keys()[i]]
+		
+		if !is_instance_valid(item):
+			continue
+		
 		if data.current_cooldown >= 0.0:
 			data.current_cooldown += delta
 			
@@ -85,6 +89,9 @@ func _process(delta:float):
 	for i in range(raw_horrors.size()):
 		var item = horrors_list_container.get_child(i)
 		var data = raw_horrors[i]
+		
+		if !is_instance_valid(data):
+			continue
 		
 		item.current_health = data.health
 	
@@ -103,6 +110,8 @@ func update_attacks_list():
 	
 func clear_attacks_list():
 	for child in attacks_list_container.get_children():
+		if child.is_connected("selected", self, "_attack_selected"):
+			child.disconnect("selected", self, "_attack_selected")
 		child.queue_free()
 	
 # Updates the horrors list
@@ -122,6 +131,12 @@ func clear_horrors_list():
 		child.queue_free()
 
 func end_fight():
+	clear_attacks_list()
+	clear_horrors_list()
+	
+	attacks_data = {}
+	horrors_data = []
+	raw_horrors = []
 	hide_ui()
 	
 func show_ui():
