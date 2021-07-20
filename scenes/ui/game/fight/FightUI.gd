@@ -38,7 +38,7 @@ func update_horrors(horrors:Array):
 			
 		horrors_data.append({
 			"readable": horror.readable,
-			"level": (ceil(horror.size * 100)) / 100,
+			"level": ceil(horror.size * 100) / 10.0,
 			"current_health": horror.health,
 			"max_health": horror.max_health,
 			"attacks": attacks

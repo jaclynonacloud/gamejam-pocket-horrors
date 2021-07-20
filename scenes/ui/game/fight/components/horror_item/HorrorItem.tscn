@@ -9,6 +9,7 @@
 margin_right = 292.0
 margin_bottom = 14.0
 mouse_filter = 2
+size_flags_horizontal = 3
 custom_styles/panel = SubResource( 1 )
 script = ExtResource( 2 )
 __meta__ = {
@@ -71,9 +72,10 @@ margin_right = 262.0
 margin_bottom = 32.0
 
 [node name="HealthProgress" type="TextureProgress" parent="MarginContainer/VBoxContainer/HealthContainer"]
-margin_right = 128.0
+margin_right = 159.0
 margin_bottom = 14.0
 size_flags_horizontal = 3
+size_flags_stretch_ratio = 2.0
 value = 10.0
 texture_under = ExtResource( 1 )
 texture_progress = ExtResource( 1 )
@@ -83,15 +85,15 @@ nine_patch_stretch = true
 stretch_margin_right = 128
 
 [node name="HealthText" type="Label" parent="MarginContainer/VBoxContainer/HealthContainer"]
-margin_left = 132.0
-margin_right = 243.0
+margin_left = 163.0
+margin_right = 242.0
 margin_bottom = 14.0
 size_flags_horizontal = 3
 text = "888/888"
 align = 2
 
 [node name="MarginContainer" type="MarginContainer" parent="MarginContainer/VBoxContainer/HealthContainer"]
-margin_left = 247.0
-margin_right = 262.0
+margin_left = 246.0
+margin_right = 261.0
 margin_bottom = 14.0
 custom_constants/margin_right = 15
