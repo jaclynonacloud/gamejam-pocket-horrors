@@ -1,0 +1,68 @@
+[gd_scene load_steps=5 format=2]
+
+[ext_resource path="res://graphics/ui/shared/right_slice.png" type="Texture" id=1]
+[ext_resource path="res://graphics/ui/shared/left_slice.png" type="Texture" id=2]
+[ext_resource path="res://scenes/ui/game/fight/components/player_item/PlayerItem.gd" type="Script" id=3]
+
+[sub_resource type="StyleBoxEmpty" id=1]
+
+[node name="PlayerItem" type="PanelContainer"]
+margin_right = 292.0
+margin_bottom = 14.0
+mouse_filter = 2
+size_flags_horizontal = 3
+custom_styles/panel = SubResource( 1 )
+script = ExtResource( 3 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+health_progress_path = NodePath("MarginContainer/HealthContainer/HealthProgress")
+health_label_path = NodePath("MarginContainer/HealthContainer/HealthText")
+
+[node name="Background" type="NinePatchRect" parent="."]
+self_modulate = Color( 0.14902, 0.14902, 0.14902, 1 )
+margin_right = 292.0
+margin_bottom = 30.0
+texture = ExtResource( 2 )
+patch_margin_left = 128
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+margin_right = 292.0
+margin_bottom = 30.0
+custom_constants/margin_right = 15
+custom_constants/margin_top = 8
+custom_constants/margin_left = 15
+custom_constants/margin_bottom = 8
+
+[node name="HealthContainer" type="HBoxContainer" parent="MarginContainer"]
+margin_left = 15.0
+margin_top = 8.0
+margin_right = 277.0
+margin_bottom = 22.0
+
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/HealthContainer"]
+margin_right = 15.0
+margin_bottom = 14.0
+custom_constants/margin_right = 15
+
+[node name="HealthProgress" type="TextureProgress" parent="MarginContainer/HealthContainer"]
+margin_left = 19.0
+margin_right = 178.0
+margin_bottom = 14.0
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 2.0
+value = 10.0
+texture_under = ExtResource( 1 )
+texture_progress = ExtResource( 1 )
+tint_under = Color( 0.164706, 0.368627, 0.172549, 1 )
+tint_progress = Color( 0.0588235, 0.972549, 0.2, 1 )
+nine_patch_stretch = true
+stretch_margin_right = 128
+
+[node name="HealthText" type="Label" parent="MarginContainer/HealthContainer"]
+margin_left = 182.0
+margin_right = 262.0
+margin_bottom = 14.0
+size_flags_horizontal = 3
+text = "888/888"
+align = 2

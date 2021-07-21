@@ -35,7 +35,7 @@ func attack(attack_key:String):
 		print("Strength: %s" % strength)
 		
 		for horror in fight_targets:
-			if !horror.take_damage(strength):
+			if !horror.take_damage(strength, self):
 				print("Kill me softly!")
 				# add horror to killed targets, so we can do fight finish when done
 				killed_targets.append(horror)
@@ -49,6 +49,13 @@ func attack(attack_key:String):
 				
 		if !has_targets_left:
 			finish_fight()
+			
+# Damages the entity!
+func take_damage(amount:float, caller:Spatial):
+	.take_damage(amount, caller)
+	
+	# update our ui
+	Globals.game_ui.fight.update_player_data()
 			
 func finish_fight():
 	print("Finish fight!!")
@@ -125,6 +132,13 @@ func get_attacks():
 	for mutation in mutations:
 		results[mutation.attack_key] = {  "power": mutation.attack_power, "cooldown": mutation.attack_cooldown, "type": mutation.get_mutation_readable() }
 	return results
+	
+# [Override]
+func get_base_attack_power():
+	var result:float = base_attack_power * self.size
+	for mutation in mutations:
+		result += (mutation.base_stats.stat_damage * 0.3) * self.size
+	return result
 
 func get_stats():
 	# get base stats

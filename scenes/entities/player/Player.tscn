@@ -18,6 +18,7 @@ script = ExtResource( 2 )
 base_stats = ExtResource( 3 )
 
 [node name="Sprite3D" type="Sprite3D" parent="."]
+layers = 2
 centered = false
 offset = Vector2( -64, 0 )
 texture = ExtResource( 1 )

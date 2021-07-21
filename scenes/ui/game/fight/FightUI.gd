@@ -3,11 +3,13 @@ extends HBoxContainer
 export var show_initial:bool = false
 export var horrors_list_container_path:NodePath
 export var attacks_list_container_path:NodePath
+export var player_item_path:NodePath
 
 onready var horrors_list_container:Control = get_node(horrors_list_container_path)
 onready var horrors_item_instance:Control = preload("res://scenes/ui/game/fight/components/horror_item/HorrorItem.tscn").instance()
 onready var attacks_list_container:Control = get_node(attacks_list_container_path)
 onready var attack_item_instance:Control = preload("res://scenes/ui/game/fight/components/attack_item/AttackItem.tscn").instance()
+onready var player_item:Control = get_node(player_item_path)
 
 var raw_horrors:Array = []
 var horrors_data:Array = []
@@ -23,7 +25,13 @@ func start_fight(attacks:Dictionary, horrors:Array=[]) -> bool:
 	show_ui()
 	update_attacks(attacks)
 	update_horrors(horrors)
+	update_player_data()
 	return true
+	
+# Updates the player info.
+func update_player_data():
+	player_item.current_health = Globals.player.health
+	player_item.max_health = Globals.player.max_health
 	
 # Adds a horror to the fight.
 func update_horrors(horrors:Array):

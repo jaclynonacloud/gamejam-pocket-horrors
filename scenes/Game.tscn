@@ -119,6 +119,15 @@ material = SubResource( 2 )
 move_speed = 15.0
 move_slide = 0.25
 
+[node name="OmniLight" type="SpotLight" parent="Player"]
+transform = Transform( 1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 12.6874, 0 )
+visible = false
+light_color = Color( 1, 0.231373, 0.231373, 1 )
+light_energy = 5.12
+shadow_enabled = true
+spot_range = 21.7865
+spot_angle = 73.8236
+
 [node name="GameCamera" parent="." instance=ExtResource( 5 )]
 target_path = NodePath("../Player")
 
