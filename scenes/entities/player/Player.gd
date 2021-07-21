@@ -25,17 +25,19 @@ func _init():
 	
 	
 # Attacks all fight targets.
-func attack(attack_key:String):
-	print("Attacking with: %s" % attack_key)
-	var attack = self.attacks.get(attack_key, null)
+func attack(attack, target:Spatial):
+	print("Attacking with: %s" % attack.attack_key)
 	if attack != null:
-		var strength:float = attack.power + self.base_attack_power
-		# lessen the power by the amount of engaged horrors
-		strength = strength * max(0.3, strength / fight_targets.size())
-		print("Strength: %s" % strength)
+#		var strength:float = attack.power + self.base_attack_power
+#		# lessen the power by the amount of engaged horrors
+#		strength = strength * max(0.3, strength / fight_targets.size())
+#		# attack must do AT LEAST one damage
+#		strength = max(1.0, strength)
+#		print("Strength: %s" % strength)
+#		attack.current_cooldown = 0.0
 		
 		for horror in fight_targets:
-			if !horror.take_damage(strength, self):
+			if !horror.take_damage(attack, self):
 				print("Kill me softly!")
 				# add horror to killed targets, so we can do fight finish when done
 				killed_targets.append(horror)
@@ -51,8 +53,11 @@ func attack(attack_key:String):
 			finish_fight()
 			
 # Damages the entity!
-func take_damage(amount:float, caller:Spatial):
-	.take_damage(amount, caller)
+func take_damage(attack, caller:Spatial):
+	var is_killed = .take_damage(attack, caller)
+	
+	if is_killed:
+		print("End Game Slate!")
 	
 	# update our ui
 	Globals.game_ui.fight.update_player_data()
@@ -130,7 +135,8 @@ func pulse_horror_area():
 func get_attacks():
 	var results:Dictionary = .get_attacks()
 	for mutation in mutations:
-		results[mutation.attack_key] = {  "power": mutation.attack_power, "cooldown": mutation.attack_cooldown, "type": mutation.get_mutation_readable() }
+		results[mutation.attack_key] = mutation
+#		results[mutation.attack_key] = {  "power": mutation.attack_power, "cooldown": mutation.attack_cooldown, "type": mutation.get_mutation_readable() }
 	return results
 	
 # [Override]

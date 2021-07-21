@@ -23,10 +23,14 @@ export var chase_check_interval:float = 0.5 # how often we will update the chase
 
 export var fight_distance:float = 20.0 setget , get_fight_distance # how close the player should be before they've initiated a fight!
 
+export var attack_interval:float = 1.0 # determines how often a horror will look to attack
+
 onready var navigation:Navigation = get_node_or_null(navigation_path)
 onready var meshes_container:Spatial = $Meshes
 onready var collision_shape:CollisionShape = $CollisionShape
 onready var collision_shape_origin:Position3D = $Meshes/CollisionOrigin
+
+onready var sprite:Spatial = $Meshes/Sprite3D
 
 var navigation_points:PoolVector3Array = []
 # stuck check
@@ -35,6 +39,7 @@ var last_position:Vector3 = Vector3.ZERO
 var total_movement:float = 0.0
 
 var behaviour_timer:Timer = Timer.new()
+var level:int = 0 setget , get_level
 
 # chase check
 var chase_target:Spatial = null
@@ -43,20 +48,48 @@ var is_chasing:bool = false setget , get_is_chasing
 
 # fighting check
 var is_fighting:bool = false setget , get_is_fighting
-var fight_target:Spatial = null
+var fight_target:Spatial = null setget set_fight_target
 var fight_position:Vector3 = Vector3.ZERO
+var fighting_data:Array = [] # generate this data whenever a fight target is engaged
+var attack_timer:Timer = Timer.new() # determines how often a horror will check to do an attack
 	
 # Called by the behaviour timer.
 func _update_behaviour():
 	if self.is_chasing:
 		navigate(chase_target.global_transform.origin)
+		
+# Called by the attack timer.
+func _do_next_attack():
+	print("Try attack!!")
+	var atks:Dictionary = self.attacks
+	# read our attacks and find one that is not currently cooling down
+	var attack_keys:Array = atks.keys()
+	attack_keys.shuffle()
+	for key in attack_keys:
+		var attack = atks[key]
+		if attack.current_cooldown >= 0.0: continue
+		# if we got here, we can use this attack!
+		attack(attack, Globals.player)
+	pass
+	
+# [Override]
+func attack(attack, target:Spatial):
+	# provide the attack
+	target.take_damage(attack, self)
+	attack.current_cooldown = 0.0
 
 # [Override]
 func ready():
 	add_child(behaviour_timer)
-	behaviour_timer.connect("timeout", self, "_update_behaviour")
+	add_child(attack_timer)
+	attack_timer.wait_time = attack_interval * self.size
+	attack_timer.one_shot = false
 	
 	self.size = size
+	
+	behaviour_timer.connect("timeout", self, "_update_behaviour")
+	attack_timer.connect("timeout", self, "_do_next_attack")
+	
 	yield(get_tree(), "idle_frame")
 	# start the next behaviour
 	next_behaviour()
@@ -68,10 +101,23 @@ func ready():
 func process(delta:float):
 	if Engine.editor_hint: return
 	
+	# update our sprite
+	if sprite != null:
+#		var cam_transform = get_viewport().get_camera().get_parent().rotation_degrees
+		var cam_transform = Globals.game_camera.rotation_degrees
+		sprite.rotation_degrees.x = cam_transform.x
+	
 	if navigation_points.size() > 0:
 		desired_velocity = Vector3.ONE
 	else:
 		desired_velocity = Vector3.ZERO
+		
+		
+	# update our attacks if we have a fight target
+	if fight_target != null:
+		for attack in self.attacks.values():
+			if attack.update_cooldown(delta):
+				attack.reset_cooldown()
 		
 # [Override]
 func physics_process(delta:float):
@@ -166,7 +212,7 @@ func fight(target:Spatial) -> bool:
 	var distance:float = target.global_transform.origin.distance_to(global_transform.origin)
 	# start fighting if in distance
 	if distance <= self.fight_distance:
-		fight_target = target
+		self.fight_target = target
 		fight_position = target.global_transform.origin.linear_interpolate(global_transform.origin, 0.5)
 		stop_chasing()
 		navigate(fight_position)
@@ -294,9 +340,12 @@ func get_speed():
 func get_attacks():
 	var results:Dictionary = .get_attacks()
 	for mutation in mutations:
-		results[mutation.attack_key] = {  "power": mutation.attack_power, "cooldown": mutation.attack_cooldown, "type": mutation.get_mutation_readable() }
+		results[mutation.attack_key] = mutation
+#		results[mutation.attack_key] = {  "power": mutation.attack_power, "cooldown": mutation.attack_cooldown, "type": mutation.get_mutation_readable() }
 	return results
 
+func get_level():
+	return ceil(self.size * 100) / 100.0
 
 func set_size(value:float):
 	size = value
@@ -315,7 +364,17 @@ func get_is_chasing():
 	
 func get_is_fighting():
 	return fight_target != null
+
+func set_fight_target(value:Spatial):
+	var last_target:Spatial = fight_target
+	fight_target = value
 	
+	# turn our fight timer on/off
+	if fight_target == last_target: return
+	if fight_target != null:
+		attack_timer.start()
+	else:
+		attack_timer.stop()
 
 func get_navigation_point_margin():
 	return navigation_point_margin

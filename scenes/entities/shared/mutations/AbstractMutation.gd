@@ -30,6 +30,32 @@ export var attack_cooldown:float = 2.0
 
 var stats:Dictionary = {} setget , get_stats
 
+var current_cooldown:float = -1.0
+var current_lifetime:int = 0
+var type:String = "" setget , get_type
+
+func get_type():
+	match mutation_type:
+		MutationTypes.Wings:
+			return "TYPE_WINGS"
+	return "TYPE_UNKNOWN"
+			
+func reset():
+	current_cooldown = -1.0
+	current_lifetime = 0
+
+# Resets the cooldown.
+func reset_cooldown():
+	 current_cooldown = -1.0
+	
+# Updates the cooldown.  Returns true if the cooldown has been completed.
+func update_cooldown(delta:float) -> bool:
+	if current_cooldown >= 0.0:
+		current_cooldown += delta
+		
+		if current_cooldown >= attack_cooldown:
+			return true
+	return false
 
 # Gets the readable mutation type.
 func get_mutation_readable():

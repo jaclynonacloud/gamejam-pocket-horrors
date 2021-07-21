@@ -15,6 +15,7 @@ radius = 22.1199
 "player",
 ]]
 script = ExtResource( 2 )
+base_health = 20.0
 base_stats = ExtResource( 3 )
 
 [node name="Sprite3D" type="Sprite3D" parent="."]

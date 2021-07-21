@@ -65,7 +65,7 @@ Battle with your pocket horror until you become the apex monster in the universe
                 - [x] Add Mutation Absorption Chance
     - [x] Verify Stats on Player and Horrors
     - [x] Create Attacks
-    - [ ] Don't forget to damage player from horror attacks!!!
+    - [x] Don't forget to damage player from horror attacks!!!
 - [ ] Interfaces
     - [ ] Create Main Menu
     - [ ] Create Pause Menu
