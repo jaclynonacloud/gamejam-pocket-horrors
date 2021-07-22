@@ -67,18 +67,30 @@ func add_point(point:Vector3, color:Color=Color.blue, duration:float=1.0):
 	update()
 "
 
-[node name="Debug" type="Control"]
+[node name="Debug" type="CanvasLayer"]
+layer = 10
+script = ExtResource( 1 )
+
+[node name="Control" type="Control" parent="."]
 anchor_right = 1.0
 anchor_bottom = 1.0
-script = ExtResource( 1 )
+mouse_filter = 2
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="ScreenDraw" type="TextureRect" parent="."]
+[node name="ScreenDraw" type="TextureRect" parent="Control"]
 anchor_right = 1.0
 anchor_bottom = 1.0
+mouse_filter = 2
 script = SubResource( 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Output" type="VBoxContainer" parent="Control"]
+anchor_bottom = 1.0
+mouse_filter = 2
 __meta__ = {
 "_edit_use_anchors_": false
 }

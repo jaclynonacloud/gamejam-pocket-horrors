@@ -10,6 +10,9 @@ height = 1.43387
 "horror",
 ]]
 collision_layer = 3
+axis_lock_angular_x = true
+axis_lock_angular_y = true
+axis_lock_angular_z = true
 script = ExtResource( 2 )
 move_speed = 8.0
 key = "Horror"
@@ -19,7 +22,7 @@ navigation_point_margin = 1.183
 transform = Transform( 0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5, 0, 0.303865, 0 )
 shape = SubResource( 1 )
 
-[node name="Meshes" type="Spatial" parent="."]
+[node name="Meshes" type="VisibilityNotifier" parent="."]
 transform = Transform( 0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5, 0, 0, 0 )
 
 [node name="CollisionOrigin" type="Position3D" parent="Meshes"]

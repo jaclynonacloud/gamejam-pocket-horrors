@@ -26,6 +26,7 @@ class BaseAttack:
 	var type:String = "TYPE_NORMAL"
 	var attack_cooldown:float = 1.0
 	var current_cooldown:float = -1.0
+	var attack_billboard_key:String = "ATTACK_SLAP"
 	
 	func _init(_key:String, _power:float, _cooldown:float, _type:String="TYPE_NORMAL"):
 		attack_key = _key
@@ -85,6 +86,13 @@ func attack(attack, target:Spatial): pass
 # The entity takes damage!  Will return false if they hit 0.0, meaning they are dead.
 func take_damage(attack, caller:Spatial) -> bool:
 	var amount:float = attack.power
+	
+	if caller == Globals.player:
+		# add recurrence power
+		var recurrence:int = caller.get_mutation_recurrence(attack)
+		if recurrence > 1:
+			amount += attack.power * recurrence * 0.3
+			print("Up the power! %s %s" % [attack.get("key"), amount])
 	
 #	var strength:float = attack.power + self.base_attack_power
 #	# lessen the power by the amount of engaged horrors

@@ -1,6 +1,6 @@
 extends Spatial
 
-onready var navigation:Navigation = $Navigation
+onready var navigation:Navigation = $GameLayer/Navigation
 
 
 func _ready():

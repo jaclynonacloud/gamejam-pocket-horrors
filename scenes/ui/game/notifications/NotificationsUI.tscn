@@ -1,0 +1,38 @@
+[gd_scene load_steps=4 format=2]
+
+[ext_resource path="res://scenes/ui/game/notifications/components/notification_item/NotificationItem.tscn" type="PackedScene" id=1]
+[ext_resource path="res://scenes/ui/game/notifications/NotificationsUI.gd" type="Script" id=2]
+
+[sub_resource type="StyleBoxFlat" id=1]
+content_margin_left = 15.0
+content_margin_right = 15.0
+content_margin_top = 5.0
+content_margin_bottom = 5.0
+bg_color = Color( 0, 0, 0, 0.156863 )
+
+[node name="NotificationsUI" type="MarginContainer"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+custom_constants/margin_bottom = 35
+script = ExtResource( 2 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+notifications_container_path = NodePath("NotificationsList")
+notification_item_path = NodePath("NotificationsList/NotificationItem")
+
+[node name="NotificationsList" type="VBoxContainer" parent="."]
+margin_left = 287.0
+margin_right = 737.0
+margin_bottom = 565.0
+rect_min_size = Vector2( 450, 0 )
+mouse_filter = 2
+size_flags_horizontal = 4
+alignment = 1
+
+[node name="NotificationItem" parent="NotificationsList" instance=ExtResource( 1 )]
+margin_top = 270.0
+margin_bottom = 294.0
+mouse_filter = 2
+custom_styles/panel = SubResource( 1 )

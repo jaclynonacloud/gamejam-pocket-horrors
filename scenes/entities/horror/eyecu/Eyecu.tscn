@@ -2,12 +2,12 @@
 
 [ext_resource path="res://scenes/entities/horror/Horror.tscn" type="PackedScene" id=1]
 [ext_resource path="res://graphics/game/entities/horror/eyecu/idle.png" type="Texture" id=2]
-[ext_resource path="res://scenes/entities/shared/mutations/wings/WingsMutation.tscn" type="PackedScene" id=3]
+[ext_resource path="res://scenes/entities/shared/mutations/eyes/EyesMutation.tscn" type="PackedScene" id=3]
 
 [sub_resource type="BoxShape" id=1]
-extents = Vector3( 1.70582, 0.824803, 1 )
+extents = Vector3( 0.391402, 0.824803, 0.205151 )
 
-[sub_resource type="AtlasTexture" id=4]
+[sub_resource type="AtlasTexture" id=2]
 flags = 23
 atlas = ExtResource( 2 )
 region = Rect2( 0, 0, 650, 387 )
@@ -17,9 +17,9 @@ flags = 23
 atlas = ExtResource( 2 )
 region = Rect2( 650, 0, 650, 387 )
 
-[sub_resource type="SpriteFrames" id=5]
+[sub_resource type="SpriteFrames" id=4]
 animations = [ {
-"frames": [ SubResource( 4 ), SubResource( 3 ), SubResource( 4 ) ],
+"frames": [ SubResource( 2 ), SubResource( 3 ), SubResource( 2 ) ],
 "loop": true,
 "name": "idle",
 "speed": 5.0
@@ -46,9 +46,9 @@ centered = false
 offset = Vector2( -325, 0 )
 billboard = 1
 shaded = true
-frames = SubResource( 5 )
+frames = SubResource( 4 )
 animation = "idle"
 frame = 1
 playing = true
 
-[node name="WingsMutation" parent="Mutations" index="0" instance=ExtResource( 3 )]
+[node name="EyesMutation" parent="Mutations" index="0" instance=ExtResource( 3 )]

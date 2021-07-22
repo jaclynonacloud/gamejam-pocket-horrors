@@ -108,6 +108,8 @@ func update_attacks_list():
 		item.cooldown = raw_attacks[key].current_cooldown
 		item.max_cooldown = raw_attacks[key].attack_cooldown
 		item.readable = key
+		var power:int = Globals.player.get_mutation_recurrence(raw_attacks[key])
+		item.power = power
 		item.type = raw_attacks[key].type
 		item.connect("selected", self, "_attack_selected", [key])
 	

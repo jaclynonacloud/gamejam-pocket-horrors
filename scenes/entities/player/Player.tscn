@@ -1,9 +1,10 @@
-[gd_scene load_steps=7 format=2]
+[gd_scene load_steps=8 format=2]
 
 [ext_resource path="res://graphics/game/entities/player/idle.png" type="Texture" id=1]
 [ext_resource path="res://scenes/entities/player/Player.gd" type="Script" id=2]
 [ext_resource path="res://custom/resources/stats/StatsResource.tres" type="Resource" id=3]
 [ext_resource path="res://scenes/entities/shared/mutations/wings/WingsMutation.tscn" type="PackedScene" id=4]
+[ext_resource path="res://scenes/entities/shared/mutations/eyes/EyesMutation.tscn" type="PackedScene" id=5]
 
 [sub_resource type="CapsuleShape" id=1]
 radius = 0.643737
@@ -31,6 +32,8 @@ shape = SubResource( 1 )
 [node name="Mutations" type="Spatial" parent="."]
 
 [node name="WingsMutation" parent="Mutations" instance=ExtResource( 4 )]
+
+[node name="EyesMutation" parent="Mutations" instance=ExtResource( 5 )]
 
 [node name="HorrorArea" type="Area" parent="."]
 monitorable = false

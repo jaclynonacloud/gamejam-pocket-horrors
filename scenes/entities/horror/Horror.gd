@@ -345,7 +345,7 @@ func get_attacks():
 	return results
 
 func get_level():
-	return ceil(self.size * 100) / 100.0
+	return ceil(self.size * 100) / 35.0
 
 func set_size(value:float):
 	size = value
@@ -354,10 +354,10 @@ func set_size(value:float):
 	mc.scale = sc
 	
 func get_chase_distance():
-	return chase_distance * get_size_multiplier()
+	return chase_distance * (get_size_multiplier() * 0.75)
 	
 func get_fight_distance():
-	return fight_distance * get_size_multiplier()
+	return fight_distance * (get_size_multiplier() * 0.9)
 	
 func get_is_chasing():
 	return chase_exhaustion >= 0.0

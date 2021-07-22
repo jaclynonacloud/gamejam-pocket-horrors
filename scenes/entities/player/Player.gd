@@ -1,5 +1,7 @@
 extends "res://scenes/entities/AbstractEntity.gd"
 
+signal mutations_changed(mutations)
+
 export var base_stats:Resource
 onready var horror_area:Area = $HorrorArea
 
@@ -23,6 +25,14 @@ func _nearby_horror_updated(body:Node, entered:bool):
 func _init():
 	Globals.player = self
 	
+# Will determine how many times this mutation has been picked up by the Player, so we can amplify the attack.
+func get_mutation_recurrence(mutation) -> int:
+	var recurrence:int = 0
+	if mutation.get("key") == null: return 1
+	for m in mutations_container.get_children():
+		if m.key == mutation.key:
+			recurrence += 1
+	return recurrence
 	
 # Attacks all fight targets.
 func attack(attack, target:Spatial):
@@ -40,7 +50,12 @@ func attack(attack, target:Spatial):
 			if !horror.take_damage(attack, self):
 				print("Kill me softly!")
 				# add horror to killed targets, so we can do fight finish when done
-				killed_targets.append(horror)
+				if !killed_targets.has(horror):
+					killed_targets.append(horror)
+			# TODO: determine billboard hit!
+			else:
+				# hit them with a billboard!
+				Globals.billboards.use(attack.attack_billboard_key, horror.global_transform.origin + Vector3.UP * 3.0)
 				
 		# check to see if we finished the fight!
 		var has_targets_left:bool = false
@@ -70,16 +85,50 @@ func finish_fight():
 		var mutes = horror.demutate()
 		all_mutations.append_array(mutes)
 		
+		
+	var current_mutations:Array = mutations_container.get_children()
 	# add all of the new mutations to our player
+	var mutations_collection:Dictionary = {}
 	for mute in all_mutations:
 		mute.get_parent().remove_child(mute)
+		mute.reset()
+		
+		# if our mutations container already holds a mutation of this type, renew it
+		for m in current_mutations:
+			if mute.key == m.key:
+				m.renew()
+		
 		mutations_container.add_child(mute)
 		mutations.append(mute)
+		
+		# count how many times we receive this mutation so we can send notifications
+		if mutations_collection.get(mute.readable, null) == null:
+			mutations_collection[mute.readable] = 1
+		else:
+			mutations_collection[mute.readable] += 1
 	
 	# rot all the horrors
 	for horror in killed_targets:
 		horror.rot()
 		
+	# increase our size based on the amount of horrors killed
+	var size_inc:float = 0.0
+	for horror in killed_targets:
+		size_inc += horror.size * 0.1
+		
+	self.size += size_inc
+		
+		
+	# queue our messages!
+	var notif_ui:Control = Globals.game_ui.notifications
+	notif_ui.queue_notification("SIZE INCREASED BY %s" % size_inc)
+	for mute_key in mutations_collection.keys():
+		var amount:int = mutations_collection[mute_key]
+		notif_ui.queue_notification("MUTATION DETECTED: %s%s" % [mute_key, "" if amount == 1 else " x%s" % amount])
+	notif_ui.next_notification()
+	
+	
+	emit_signal("mutations_changed", mutations_container.get_children())
 		
 	# hide fight ui
 	Globals.game_ui.fight.end_fight()
@@ -89,6 +138,8 @@ func finish_fight():
 
 func ready():
 	.ready()
+	
+	emit_signal("mutations_changed", mutations)
 	
 	yield(get_tree(), "idle_frame")
 	

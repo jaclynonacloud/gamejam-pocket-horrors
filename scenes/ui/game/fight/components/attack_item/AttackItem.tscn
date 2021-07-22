@@ -18,11 +18,12 @@ __meta__ = {
 }
 cooldown_node_path = NodePath("CooldownProgress")
 readable_node_path = NodePath("AttackDataContainer/HBoxContainer/Readable")
-type_node_path = NodePath("AttackDataContainer/HBoxContainer/Type")
+power_node_path = NodePath("AttackDataContainer/HBoxContainer/HBoxContainer/Power")
+type_node_path = NodePath("AttackDataContainer/HBoxContainer/HBoxContainer/Type")
 
 [node name="CooldownProgress" type="TextureProgress" parent="."]
 margin_right = 293.0
-margin_bottom = 34.0
+margin_bottom = 51.0
 mouse_filter = 2
 size_flags_horizontal = 3
 value = 50.0
@@ -32,7 +33,7 @@ nine_patch_stretch = true
 
 [node name="AttackDataContainer" type="MarginContainer" parent="."]
 margin_right = 293.0
-margin_bottom = 34.0
+margin_bottom = 51.0
 mouse_filter = 2
 custom_constants/margin_right = 15
 custom_constants/margin_top = 10
@@ -41,22 +42,38 @@ custom_constants/margin_bottom = 10
 
 [node name="HBoxContainer" type="HBoxContainer" parent="AttackDataContainer"]
 margin_left = 15.0
-margin_top = 10.0
+margin_top = 18.0
 margin_right = 278.0
-margin_bottom = 24.0
+margin_bottom = 32.0
+size_flags_vertical = 4
 
 [node name="Readable" type="Label" parent="AttackDataContainer/HBoxContainer"]
 margin_right = 129.0
 margin_bottom = 14.0
 size_flags_horizontal = 3
 text = "ATTACK_SLAP"
+valign = 1
 autowrap = true
 
-[node name="Type" type="Label" parent="AttackDataContainer/HBoxContainer"]
+[node name="HBoxContainer" type="HBoxContainer" parent="AttackDataContainer/HBoxContainer"]
 margin_left = 133.0
 margin_right = 263.0
+margin_bottom = 14.0
+size_flags_horizontal = 3
+
+[node name="Power" type="Label" parent="AttackDataContainer/HBoxContainer/HBoxContainer"]
+margin_right = 15.0
+margin_bottom = 14.0
+custom_colors/font_color = Color( 0.631373, 0.631373, 0.631373, 1 )
+text = "8x"
+valign = 1
+
+[node name="Type" type="Label" parent="AttackDataContainer/HBoxContainer/HBoxContainer"]
+margin_left = 19.0
+margin_right = 130.0
 margin_bottom = 14.0
 size_flags_horizontal = 3
 custom_colors/font_color = Color( 0.631373, 0.631373, 0.631373, 1 )
 text = "TYPE"
 align = 2
+valign = 1

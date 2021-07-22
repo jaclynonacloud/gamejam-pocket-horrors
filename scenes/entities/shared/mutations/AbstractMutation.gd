@@ -21,6 +21,7 @@ export (MutationTypes) var mutation_type:int = 0
 export var lifetime:int = 10 # how many mutation cycles the mutation lasts before it disappears
 export var power:float = 1.0 setget , get_power # the multiplicity of how powerful this mutation is
 export (float, 0.0, 1.0, 0.01) var chance:float = 1.0 # chances of getting mutation from drop
+export var attack_billboard_key:String = "ATTACK_SLAP"
 
 export var base_stats:Resource
 
@@ -38,10 +39,17 @@ func get_type():
 	match mutation_type:
 		MutationTypes.Wings:
 			return "TYPE_WINGS"
+		MutationTypes.Eyes:
+			return "TYPE_EYES"
 	return "TYPE_UNKNOWN"
 			
+# Resets the mutation.
 func reset():
 	current_cooldown = -1.0
+	current_lifetime = 0
+	
+# Renews the lifetime of the mutation.
+func renew():
 	current_lifetime = 0
 
 # Resets the cooldown.
@@ -59,8 +67,7 @@ func update_cooldown(delta:float) -> bool:
 
 # Gets the readable mutation type.
 func get_mutation_readable():
-	match mutation_type:
-		MutationTypes.Wings: return "TYPE_WINGS"
+	return self.type
 
 
 func get_key():
