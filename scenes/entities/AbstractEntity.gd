@@ -1,5 +1,7 @@
 extends PhysicsBody
 
+signal health_updated(current_health, max_health)
+
 export var move_speed:float = 5.0
 export var gravity:float = 2.0
 export (float, 0.0, 1.0, 0.01) var move_slide:float = 0.35
@@ -7,7 +9,12 @@ export var base_attack_key:String = "ATTACK_SLAP"
 export var base_attack_power:float = 1.0 setget , get_base_attack_power
 export var base_attack_cooldown:float = 1.0
 export var base_health:float = 10.0
+export (float, 0.1, 10.0, 0.05) var size:float = 1.0 setget set_size
 
+onready var meshes_container:Spatial = $Meshes
+onready var collision_shape:CollisionShape = $CollisionShape
+onready var collision_shape_origin:Position3D = $Meshes/CollisionOrigin
+onready var sprite_container:Spatial = $Meshes/Sprite3D
 onready var mutations_container:Node = $Mutations
 onready var mutations:Array = mutations_container.get_children()
 onready var base_attack:BaseAttack = BaseAttack.new(base_attack_key, base_attack_power, base_attack_cooldown)
@@ -18,6 +25,7 @@ var velocity:Vector3 = Vector3.ZERO
 var attacks:Dictionary = {} setget , get_attacks
 var health:float = 0.0
 var max_health:float = base_health setget , get_max_health
+var desired_scale:Vector3 = Vector3.ONE
 
 
 class BaseAttack:
@@ -47,9 +55,12 @@ class BaseAttack:
 		return false
 
 func _ready():
+	self.size = size
+	
 	ready()
 	
 	yield(get_tree(), "idle_frame")
+	
 	# set current health to max health at start
 	health = self.max_health
 
@@ -104,11 +115,23 @@ func take_damage(attack, caller:Spatial) -> bool:
 		
 	health = max(0.0, health - amount)
 	
+	emit_signal("health_updated", health, self.max_health)
+	
 	if health == 0.0:
 		print("We're DEAD!!")
 		return false
 		
 	return true
+	
+# Changes the collider size.  Only do this ONCE it causes glitchiness.
+func change_collider_size():
+	var sc:Vector3 = Vector3.ONE * max(0.01, size - 0.5)
+	var cc:Spatial = collision_shape if collision_shape != null else get_node("CollisionShape")
+	print("SC")
+	print(sc)
+	cc.scale = sc
+	var col_origin:Spatial = collision_shape_origin if collision_shape_origin != null else get_node("Meshes/CollisionOrigin")
+	cc.global_transform.origin = col_origin.global_transform.origin
 		
 func get_speed():
 	return move_speed
@@ -130,3 +153,9 @@ func get_max_health():
 	for mutation in mutations:
 		result += mutation.base_stats.stat_max_health * self.size
 	return result
+
+func set_size(value:float):
+	size = value
+	var sc:Vector3 = Vector3.ONE * max(0.01, size - 0.5)
+	var mc:Spatial = meshes_container if meshes_container != null else get_node("Meshes")
+	desired_scale = sc

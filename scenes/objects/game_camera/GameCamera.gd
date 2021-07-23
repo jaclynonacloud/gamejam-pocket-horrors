@@ -20,9 +20,11 @@ func _init():
 func _process(delta):
 #	# if we have a target node, move toward it
 	if target != null:
-		translation = translation.linear_interpolate(target.translation, camera_slide)
+		translation = translation.linear_interpolate(target.camera_target.global_transform.origin, camera_slide)
 		
 	rotation_degrees.x = lerp(rotation_degrees.x, fight_pitch, 0.1)
+	
+	camera.transform.basis.z.z = lerp(camera.transform.basis.z.z, self.zoom, 0.2)
 
 # Focuses on one target.
 func focus(_target:Spatial):
@@ -39,4 +41,6 @@ func calculate_zoom() -> Vector3:
 	return Vector3.ZERO
 
 func get_zoom():
+	return starting_zoom
+#	return starting_zoom if fight_pitch == 0.0 else fight_zoom
 	return starting_zoom if fight_pitch == 0.0 else fight_zoom

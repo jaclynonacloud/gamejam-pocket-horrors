@@ -54,10 +54,13 @@ size_flags_stretch_ratio = 2.0
 value = 10.0
 texture_under = ExtResource( 1 )
 texture_progress = ExtResource( 1 )
-tint_under = Color( 0.164706, 0.368627, 0.172549, 1 )
-tint_progress = Color( 0.0588235, 0.972549, 0.2, 1 )
+tint_under = Color( 0.164706, 0.368627, 0.168627, 1 )
+tint_progress = Color( 0.0588235, 0.972549, 0.545098, 1 )
 nine_patch_stretch = true
 stretch_margin_right = 128
+__meta__ = {
+"_edit_use_anchors_": false
+}
 
 [node name="HealthText" type="Label" parent="MarginContainer/HealthContainer"]
 margin_left = 182.0

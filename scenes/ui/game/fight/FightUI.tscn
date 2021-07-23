@@ -5,21 +5,18 @@
 [ext_resource path="res://scenes/ui/game/fight/components/horror_item/HorrorItem.tscn" type="PackedScene" id=3]
 [ext_resource path="res://scenes/ui/game/fight/components/player_item/PlayerItem.tscn" type="PackedScene" id=4]
 
-[node name="FightUI" type="HBoxContainer"]
+[node name="FightUI" type="Control"]
 anchor_right = 1.0
 anchor_bottom = 1.0
 mouse_filter = 2
 script = ExtResource( 2 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
 horrors_list_container_path = NodePath("HorrorsContainer/HorrorsList")
 attacks_list_container_path = NodePath("AttacksContainer/VBoxContainer/AttacksList")
 player_item_path = NodePath("AttacksContainer/VBoxContainer/PlayerItem")
 
 [node name="HorrorsContainer" type="MarginContainer" parent="."]
 margin_right = 362.0
-margin_bottom = 600.0
+margin_bottom = 752.0
 mouse_filter = 2
 size_flags_horizontal = 3
 custom_constants/margin_right = 35
@@ -31,7 +28,7 @@ custom_constants/margin_bottom = 15
 margin_left = 35.0
 margin_top = 15.0
 margin_right = 315.0
-margin_bottom = 585.0
+margin_bottom = 737.0
 mouse_filter = 2
 size_flags_horizontal = 0
 
@@ -39,30 +36,26 @@ size_flags_horizontal = 0
 margin_right = 280.0
 margin_bottom = 62.0
 
-[node name="Buffer" type="MarginContainer" parent="."]
-margin_left = 366.0
-margin_right = 657.0
-margin_bottom = 600.0
-size_flags_horizontal = 3
-size_flags_stretch_ratio = 0.8
-
 [node name="AttacksContainer" type="MarginContainer" parent="."]
-margin_left = 661.0
-margin_right = 1024.0
-margin_bottom = 600.0
+anchor_left = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = -320.0
 mouse_filter = 2
 size_flags_horizontal = 3
 custom_constants/margin_right = 35
 custom_constants/margin_top = 15
 custom_constants/margin_left = 35
 custom_constants/margin_bottom = 15
+__meta__ = {
+"_edit_use_anchors_": false
+}
 
 [node name="VBoxContainer" type="VBoxContainer" parent="AttacksContainer"]
-margin_left = 78.0
+margin_left = 35.0
 margin_top = 15.0
-margin_right = 328.0
+margin_right = 285.0
 margin_bottom = 585.0
-grow_vertical = 0
 rect_min_size = Vector2( 250, 0 )
 mouse_filter = 2
 size_flags_horizontal = 8

@@ -10,5 +10,6 @@ readable = "MUTATION_EYES"
 mutation_type = 4
 lifetime = 4
 attack_billboard_key = "ATTACK_EYE"
+trait_slot_key = "eye"
 base_stats = ExtResource( 2 )
 attack_key = "ATTACK_EVIL_EYE"

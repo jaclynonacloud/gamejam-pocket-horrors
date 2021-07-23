@@ -31,6 +31,8 @@ base_health = 5.0
 key = "eyecu"
 readable = "HORROR_EYECU"
 species = "SPECIES_BUTTERFLY"
+chase_distance = 20.0
+fight_distance = 7.0
 attack_interval = 3.0
 
 [node name="CollisionShape" parent="." index="0"]
@@ -48,7 +50,6 @@ billboard = 1
 shaded = true
 frames = SubResource( 4 )
 animation = "idle"
-frame = 1
 playing = true
 
 [node name="EyesMutation" parent="Mutations" index="0" instance=ExtResource( 3 )]

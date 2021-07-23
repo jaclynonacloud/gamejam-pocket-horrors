@@ -9,12 +9,13 @@ onready var health_label:Label = get_node(health_label_path)
 var current_health:float = 0.0 setget set_current_health
 var max_health:float = 1.0 setget set_max_health
 
+func _process(delta):
+	var normalized_health:float = ceil((current_health / max_health) * 100)
+	if health_progress != null:
+		health_progress.value = lerp(health_progress.value, normalized_health, 0.2)
 
 # Updates health values.
 func update_health():
-	var normalized_health:float = (current_health / max_health) * 100
-	if health_progress != null:
-		health_progress.value = lerp(health_progress.value, normalized_health, 0.5)
 	if health_label != null:
 		health_label.text = "%s/%s" % [floor(current_health), floor(max_health)]
 	

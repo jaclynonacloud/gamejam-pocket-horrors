@@ -3,10 +3,11 @@ extends "res://scenes/entities/AbstractEntity.gd"
 signal mutations_changed(mutations)
 
 export var base_stats:Resource
+onready var traits_container:Node = $CollisionShape/Meshes/Sprite3D/TraitsContainer
 onready var horror_area:Area = $HorrorArea
+onready var camera_target:Spatial = $CollisionShape/Meshes/CameraTarget
 
 var stats:Dictionary = {} setget , get_stats
-var size:float = 1.0 # TODO: implement this my dude!
 var nearby_horrors:Array = []
 
 # fighting stuffs
@@ -117,6 +118,13 @@ func finish_fight():
 		size_inc += horror.size * 0.1
 		
 	self.size += size_inc
+	change_collider_size()
+
+	# set our bodily traits
+	traits_container.clear_traits()
+	for mute in mutations_container.get_children():
+		if mute.trait_slot_key != "":
+			traits_container.add_trait(mute.trait_slot_key, 1)
 		
 		
 	# queue our messages!
@@ -138,6 +146,17 @@ func finish_fight():
 
 func ready():
 	.ready()
+	
+#	onready var meshes_container:Spatial = $Meshes
+#onready var collision_shape:CollisionShape = $CollisionShape
+#onready var collision_shape_origin:Position3D = $Meshes/CollisionOrigin
+#onready var sprite_container:Spatial = $Meshes/Sprite3D
+
+	meshes_container = get_node("CollisionShape/Meshes")
+	collision_shape_origin = get_node("CollisionShape/Meshes/CollisionOrigin")
+	sprite_container = get_node("CollisionShape/Meshes/Sprite3D")
+	
+	change_collider_size()
 	
 	emit_signal("mutations_changed", mutations)
 	
@@ -161,12 +180,23 @@ func process(delta:float):
 			desired_velocity = move_axis_v3 * self.speed
 		else:
 			desired_velocity = Vector3.ZERO
+			
+	# update our sprite
+	if sprite_container != null:
+		var cam_transform = Globals.game_camera.rotation_degrees
+		sprite_container.rotation_degrees.x = cam_transform.x
 		
 		
 	# update nearby horrors
 	for horror in nearby_horrors:
 		# the horrors themselves will decide whether they want to engage
 		horror.update_behaviour(self)
+		
+		
+	# update our scale if we are not close
+	var is_close_to_scale:bool = abs(meshes_container.scale.length() - desired_scale.length()) < 0.02
+	if !is_close_to_scale:
+		meshes_container.scale = meshes_container.scale.linear_interpolate(desired_scale, 0.9 * delta)
 	
 # [Override]
 func calculate_movement(delta:float):
@@ -214,3 +244,10 @@ func set_fight_targets(value:Array):
 	# start fight ui if it is not already open
 	if !Globals.game_ui.fight.start_fight(self.attacks, fight_targets):
 		Globals.game_ui.fight.update_horrors(fight_targets)
+
+# [Override]
+func set_size(value:float):
+	size = value
+	var sc:Vector3 = Vector3.ONE * max(0.01, size - 0.5)
+	var mc:Spatial = meshes_container if meshes_container != null else get_node("CollisionShape/Meshes")
+	desired_scale = Vector3.ONE

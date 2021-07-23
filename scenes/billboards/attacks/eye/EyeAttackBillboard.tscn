@@ -40,16 +40,19 @@ tracks/2/keys = {
 "times": PoolRealArray( 0, 1.7, 2 ),
 "transitions": PoolRealArray( 1, 1, 1 ),
 "update": 0,
-"values": [ Color( 1, 1, 1, 1 ), Color( 1, 1, 1, 1 ), Color( 1, 1, 1, 0 ) ]
+"values": [ Color( 1, 0, 0, 1 ), Color( 1, 0, 0.513726, 1 ), Color( 1, 0, 0, 0 ) ]
 }
 
 [node name="EyeAttackBillboard" type="Spatial"]
 script = ExtResource( 2 )
 
 [node name="Sprite3D" type="Sprite3D" parent="."]
-transform = Transform( 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 )
+transform = Transform( 0.8, 0, 0, 0, 0.8, 0, 0, 0, 0.8, 0, 0, 0 )
+modulate = Color( 1, 0, 0, 1 )
+billboard = 1
 texture = ExtResource( 1 )
 hframes = 4
+frame = 3
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
 autoplay = "run"

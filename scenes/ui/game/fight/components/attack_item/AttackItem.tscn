@@ -23,7 +23,7 @@ type_node_path = NodePath("AttackDataContainer/HBoxContainer/HBoxContainer/Type"
 
 [node name="CooldownProgress" type="TextureProgress" parent="."]
 margin_right = 293.0
-margin_bottom = 51.0
+margin_bottom = 34.0
 mouse_filter = 2
 size_flags_horizontal = 3
 value = 50.0
@@ -33,7 +33,7 @@ nine_patch_stretch = true
 
 [node name="AttackDataContainer" type="MarginContainer" parent="."]
 margin_right = 293.0
-margin_bottom = 51.0
+margin_bottom = 34.0
 mouse_filter = 2
 custom_constants/margin_right = 15
 custom_constants/margin_top = 10
@@ -42,9 +42,9 @@ custom_constants/margin_bottom = 10
 
 [node name="HBoxContainer" type="HBoxContainer" parent="AttackDataContainer"]
 margin_left = 15.0
-margin_top = 18.0
+margin_top = 10.0
 margin_right = 278.0
-margin_bottom = 32.0
+margin_bottom = 24.0
 size_flags_vertical = 4
 
 [node name="Readable" type="Label" parent="AttackDataContainer/HBoxContainer"]

@@ -9,12 +9,10 @@ const NAVIGATION_STUCK_MARGIN:float = 0.05
 
 export var key:String = "" setget , get_key
 export var readable:String = ""
-export (String, "SPECIES_BLOB", "SPECIES_BUTTERFLY") var species:String = ""
-export (float, 0.1, 10.0, 0.05) var size:float = 1.0 setget set_size
+export (String, "SPECIES_BLOB", "SPECIES_BUTTERFLY", "SPECIES_EYE") var species:String = ""
 export var navigation_path:NodePath
 export var navigation_point_margin:float = 1.0 setget , get_navigation_point_margin # how close before the point is considered reached
 export var stuck_check_interval:float = NAVIGATION_STUCK_CHECK_INTERVAL
-export (float, 0.0, 1.0, 0.01) var devotion:float = 0.0 # how devoted a species is to the player
 
 export var chase_speed:float = 20.0
 export var chase_distance:float = 30.0 setget , get_chase_distance # how close the player should be before chasing is initialized
@@ -26,11 +24,6 @@ export var fight_distance:float = 20.0 setget , get_fight_distance # how close t
 export var attack_interval:float = 1.0 # determines how often a horror will look to attack
 
 onready var navigation:Navigation = get_node_or_null(navigation_path)
-onready var meshes_container:Spatial = $Meshes
-onready var collision_shape:CollisionShape = $CollisionShape
-onready var collision_shape_origin:Position3D = $Meshes/CollisionOrigin
-
-onready var sprite:Spatial = $Meshes/Sprite3D
 
 var navigation_points:PoolVector3Array = []
 # stuck check
@@ -85,10 +78,11 @@ func ready():
 	attack_timer.wait_time = attack_interval * self.size
 	attack_timer.one_shot = false
 	
-	self.size = size
-	
 	behaviour_timer.connect("timeout", self, "_update_behaviour")
 	attack_timer.connect("timeout", self, "_do_next_attack")
+	
+	# scale the horror only once
+	meshes_container.scale = desired_scale
 	
 	yield(get_tree(), "idle_frame")
 	# start the next behaviour
@@ -102,10 +96,10 @@ func process(delta:float):
 	if Engine.editor_hint: return
 	
 	# update our sprite
-	if sprite != null:
+	if sprite_container != null:
 #		var cam_transform = get_viewport().get_camera().get_parent().rotation_degrees
 		var cam_transform = Globals.game_camera.rotation_degrees
-		sprite.rotation_degrees.x = cam_transform.x
+		sprite_container.rotation_degrees.x = cam_transform.x
 	
 	if navigation_points.size() > 0:
 		desired_velocity = Vector3.ONE
@@ -314,15 +308,6 @@ func navigation_complete():
 	
 	emit_signal("navigation_completed")
 	
-	
-# Changes the collider size.  Only do this ONCE it causes glitchiness.
-func change_collider_size():
-	var sc:Vector3 = Vector3.ONE * max(0.01, size - 0.5)
-	var cc:Spatial = collision_shape if collision_shape != null else get_node("CollisionShape")
-	cc.scale = sc
-	var col_origin:Spatial = collision_shape_origin if collision_shape_origin != null else get_node("Meshes/CollisionOrigin")
-	cc.global_transform.origin = col_origin.global_transform.origin
-	
 # Gets the size multiplier.
 func get_size_multiplier():
 	return ((size / MAX_SIZE) + 0.3)
@@ -346,18 +331,14 @@ func get_attacks():
 
 func get_level():
 	return ceil(self.size * 100) / 35.0
-
-func set_size(value:float):
-	size = value
-	var sc:Vector3 = Vector3.ONE * max(0.01, size - 0.5)
-	var mc:Spatial = meshes_container if meshes_container != null else get_node("Meshes")
-	mc.scale = sc
 	
 func get_chase_distance():
-	return chase_distance * (get_size_multiplier() * 0.75)
+	return chase_distance
+#	return chase_distance + chase_distance * (get_size_multiplier() * 0.10)
 	
 func get_fight_distance():
-	return fight_distance * (get_size_multiplier() * 0.9)
+	return fight_distance
+#	return fight_distance + fight_distance * (get_size_multiplier() * 0.05)
 	
 func get_is_chasing():
 	return chase_exhaustion >= 0.0

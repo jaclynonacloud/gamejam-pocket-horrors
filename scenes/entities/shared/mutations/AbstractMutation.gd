@@ -22,6 +22,7 @@ export var lifetime:int = 10 # how many mutation cycles the mutation lasts befor
 export var power:float = 1.0 setget , get_power # the multiplicity of how powerful this mutation is
 export (float, 0.0, 1.0, 0.01) var chance:float = 1.0 # chances of getting mutation from drop
 export var attack_billboard_key:String = "ATTACK_SLAP"
+export var trait_slot_key:String = ""
 
 export var base_stats:Resource
 

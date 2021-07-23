@@ -28,4 +28,7 @@ transform = Transform( 0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5, 0, 0, 0 )
 [node name="CollisionOrigin" type="Position3D" parent="Meshes"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.607731, 0 )
 
+[node name="CameraTarget" type="Position3D" parent="Meshes"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.02459, 0 )
+
 [node name="Mutations" type="Spatial" parent="."]

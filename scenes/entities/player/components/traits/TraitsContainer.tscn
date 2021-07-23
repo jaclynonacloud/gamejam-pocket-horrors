@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=2]
+
+[ext_resource path="res://scenes/entities/player/components/traits/TraitsContainer.gd" type="Script" id=1]
+
+[node name="TraitsContainer" type="Spatial"]
+script = ExtResource( 1 )

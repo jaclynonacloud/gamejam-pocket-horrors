@@ -1,4 +1,4 @@
-extends HBoxContainer
+extends Control
 
 export var show_initial:bool = false
 export var horrors_list_container_path:NodePath
@@ -13,7 +13,6 @@ onready var player_item:Control = get_node(player_item_path)
 
 var raw_horrors:Array = []
 var raw_attacks:Dictionary = {}
-#var attacks_data:Dictionary = {}
 
 func _ready():
 	if show_initial: show_ui()
@@ -65,6 +64,9 @@ func start_fight(attacks:Dictionary, horrors:Array=[]) -> bool:
 	update_attacks(attacks)
 	update_horrors(horrors)
 	update_player_data()
+	
+	# hides the game hud in favour of the fight hud
+	get_parent().hide_hud()
 	return true
 	
 # Updates the player info.
@@ -142,6 +144,9 @@ func end_fight():
 	raw_attacks = {}
 	raw_horrors = []
 	hide_ui()
+	
+	# show the game hud again
+	get_parent().show_hud()
 	
 func show_ui():
 	visible = true
