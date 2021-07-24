@@ -1,0 +1,15 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+path="res://.import/The Bumbler.mp3-20c50eb130b2a13dd4bc5f619a6c045f.mp3str"
+
+[deps]
+
+source_file="res://sfx/Spooky Juice-20210724T153133Z-001/Spooky Juice/Character Noises/The Bumbler.mp3"
+dest_files=[ "res://.import/The Bumbler.mp3-20c50eb130b2a13dd4bc5f619a6c045f.mp3str" ]
+
+[params]
+
+loop=true
+loop_offset=0

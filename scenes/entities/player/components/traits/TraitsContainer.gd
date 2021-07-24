@@ -62,6 +62,7 @@ func hide_all_traits():
 # Randomly staggers trait animations.
 func stagger():
 	for trait in traits:
-		trait.playing = false
-		yield(get_tree().create_timer(rand_range(0.05, 0.2)), "timeout")
-		trait.playing = true
+		if trait.get("playing"):
+			trait.playing = false
+			yield(get_tree().create_timer(rand_range(0.05, 0.2)), "timeout")
+			trait.playing = true

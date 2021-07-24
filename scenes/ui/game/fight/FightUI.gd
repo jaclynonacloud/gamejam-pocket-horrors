@@ -148,8 +148,10 @@ func update_horrors_list():
 		horrors_list_container.add_child(item)
 		item.readable = horror.readable
 		item.level = horror.level
-		item.current_health = horror.health
-		item.max_health = horror.max_health
+		item.current_health = floor(horror.health)
+		item.max_health = floor(horror.max_health)
+		
+		print("Setting up: %s with %s/%s" % [horror.readable, horror.health, horror.max_health])
 
 
 # Clears the horrors visual list.

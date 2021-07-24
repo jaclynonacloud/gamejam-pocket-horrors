@@ -5,9 +5,14 @@ HORROR_GORE,Agoreable George
 ATTACK_SLAP,Slap
 ATTACK_EVIL_EYE,Evil Eye
 ATTACK_WING,Frantic Flap
+ATTACK_GORE,Rackem' Smackem'
 TYPE_NORMAL,Normal
-TYPE_EYES,Accuracy
-MUTATION_EYES,Eye Mutation
+TYPE_EYES,Normal
+TYPE_GORE,Health
+TYPE_WINGS,Normal
+MUTATION_EYES,Eyes
+MUTATION_GORE,Antlers
+MUTATION_WINGS,Big Ol' Wings
 ACTION_EYE,Eye Spy
 SIZE_METRIC,souls
 PROGRESS_0, 
@@ -18,7 +23,9 @@ PROGRESS_50,The ground quakes softly beneath you.
 PROGRESS_75,The chants of the tall ones plagues your ears.
 PROGRESS_100,Ambeaux the Almighty has arisen!
 MESSAGE_MUTATION_DETECTED,[color={important_colour}]Mutating...[/color]
+MESSAGE_MUTATION_LOST,[color={fail_colour}]Losing...[/color]
 MESSAGE_SIZE_INCREASED,Size increasing by
 MESSAGE_WEARY,You feel very weary.
 MESSAGE_HEALTH_PICKUP,Consume Blood Gem
 MESSAGE_FIGHT,Fight Horrors
+MESSAGE_CONSUME_BLOOD_GEM,You feel replenished.

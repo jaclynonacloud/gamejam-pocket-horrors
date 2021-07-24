@@ -1,0 +1,15 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+path="res://.import/Fish Frenzy.mp3-7341718762b3ea56ac3f54238adb9b8e.mp3str"
+
+[deps]
+
+source_file="res://sfx/Spooky Juice-20210724T153133Z-001/Spooky Juice/Character Noises/Fish Frenzy.mp3"
+dest_files=[ "res://.import/Fish Frenzy.mp3-7341718762b3ea56ac3f54238adb9b8e.mp3str" ]
+
+[params]
+
+loop=true
+loop_offset=0

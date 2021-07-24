@@ -2,10 +2,12 @@ tool
 extends Spatial
 
 const HORROR_MAP:Array = [
-	"HORROR_EYECU"
+	"HORROR_EYECU",
+	"HORROR_BUTTERFLY",
+	"HORROR_GORE"
 ]
 
-export (Array, int, "HORROR_EYECU") var spawns:Array = []
+export (Array, int, "HORROR_EYECU", "HORROR_BUTTERFLY", "HORROR_GORE") var spawns:Array = []
 export var spawn_interval:float = 5.0
 export var max_spawns:int = 5
 export var spawn_range:float = 1.0 setget set_spawn_range

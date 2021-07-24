@@ -1,0 +1,15 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+path="res://.import/EyeCU.mp3-0f7a26b2462efe8e1f274f8d31c6680d.mp3str"
+
+[deps]
+
+source_file="res://sfx/Spooky Juice-20210724T153133Z-001/Spooky Juice/Character Noises/EyeCU.mp3"
+dest_files=[ "res://.import/EyeCU.mp3-0f7a26b2462efe8e1f274f8d31c6680d.mp3str" ]
+
+[params]
+
+loop=true
+loop_offset=0

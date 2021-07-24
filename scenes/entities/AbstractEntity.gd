@@ -1,6 +1,7 @@
 extends PhysicsBody
 
 signal health_updated(current_health, max_health)
+signal size_changed(size)
 
 const MAX_SIZE:float = 10.0
 
@@ -25,7 +26,7 @@ var speed:float = move_speed setget , get_speed
 var desired_velocity:Vector3 = Vector3.ZERO
 var velocity:Vector3 = Vector3.ZERO
 var attacks:Dictionary = {} setget , get_attacks
-var health:float = 0.0
+var health:float = 0.0 setget , get_health
 var max_health:float = base_health setget , get_max_health
 var desired_scale:Vector3 = Vector3.ONE
 
@@ -107,7 +108,7 @@ func take_damage(attack, caller:Spatial) -> bool:
 	if caller == Globals.player:
 		# if this is a base attack, include the caller's base stats too
 		if attack is BaseAttack:
-			amount = attack.power * caller.get_base_attack_power()
+			amount = attack.power * caller.get_base_attack_power() * 5.0
 			
 		else:
 			# add recurrence power
@@ -136,6 +137,14 @@ func take_damage(attack, caller:Spatial) -> bool:
 		return false
 		
 	return true
+	
+# Heals the entity!
+func heal(amount:float):
+	health = clamp(health + amount, 0.0, self.max_health)
+	emit_signal("health_updated", health, self.max_health)
+	
+func heal_full():
+	heal(self.max_health)
 	
 # Changes the collider size.  Only do this ONCE it causes glitchiness.
 func change_collider_size():
@@ -170,11 +179,16 @@ func get_attacks():
 func get_base_attack_power():
 	var result:float = base_attack_power * self.size
 	for mutation in mutations:
+		if !is_instance_valid(mutation): continue
 		result += mutation.base_stats.stat_damage * self.size
 	return result
+	
+func get_health():
+	return min(health, self.max_health)
 		
 func get_max_health():
 	var result:float = base_health * self.size
 	for mutation in mutations:
+		if !is_instance_valid(mutation): continue
 		result += mutation.base_stats.stat_max_health * self.size
 	return result

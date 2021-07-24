@@ -1,21 +1,27 @@
-[gd_scene load_steps=7 format=2]
+[gd_scene load_steps=9 format=2]
 
 [ext_resource path="res://globals/custom/CustomsManager.gd" type="Script" id=1]
-[ext_resource path="res://graphics/ui/actions/key_q.png" type="Texture" id=2]
+[ext_resource path="res://scenes/entities/horror/butterfly/Butterfly.tscn" type="PackedScene" id=2]
 [ext_resource path="res://graphics/ui/actions/key_r.png" type="Texture" id=3]
 [ext_resource path="res://graphics/ui/actions/key_e.png" type="Texture" id=4]
 [ext_resource path="res://scenes/entities/horror/eyecu/Eyecu.tscn" type="PackedScene" id=5]
 [ext_resource path="res://graphics/ui/actions/key_f.png" type="Texture" id=6]
+[ext_resource path="res://scenes/entities/horror/george/George.tscn" type="PackedScene" id=7]
+[ext_resource path="res://sfx/Spooky Juice-20210724T153133Z-001/Spooky Juice/Ambient Noises/Ambient Noise- Tin Paulstretch But Just One 1.mp3" type="AudioStream" id=8]
 
 [node name="CustomsManager" type="Node"]
 script = ExtResource( 1 )
 important_colour = Color( 0.909804, 0.0862745, 0.298039, 1 )
+fail_colour = Color( 0.937255, 0.415686, 0, 1 )
+progress_update_sfx = ExtResource( 8 )
 actions_map = {
-"action_fight": ExtResource( 6 ),
-"action_pickup": ExtResource( 2 ),
+"action_fight": ExtResource( 4 ),
+"action_pickup": ExtResource( 6 ),
 "action_primary": ExtResource( 4 ),
 "action_secondary": ExtResource( 3 )
 }
 horrors = {
-"HORROR_EYECU": ExtResource( 5 )
+"HORROR_BUTTERFLY": ExtResource( 2 ),
+"HORROR_EYECU": ExtResource( 5 ),
+"HORROR_GORE": ExtResource( 7 )
 }

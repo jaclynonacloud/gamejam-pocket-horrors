@@ -1,0 +1,13 @@
+[gd_scene load_steps=3 format=2]
+
+[ext_resource path="res://scenes/actions/AbstractAction.tscn" type="PackedScene" id=1]
+[ext_resource path="res://scenes/actions/gore/GoreAction.gd" type="Script" id=2]
+
+[node name="GoreAction" instance=ExtResource( 1 )]
+script = ExtResource( 2 )
+action_name = ""
+readable = "ACTION_GORE"
+show_in_ui = false
+regen_interval = 8.0
+regen_amount = 0.03
+is_percent = true

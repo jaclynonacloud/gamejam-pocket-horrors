@@ -1,0 +1,15 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+path="res://.import/Oozenator.mp3-2e17031c8be383011b2c2d341c7b4573.mp3str"
+
+[deps]
+
+source_file="res://sfx/Spooky Juice-20210724T153133Z-001/Spooky Juice/Character Noises/Oozenator.mp3"
+dest_files=[ "res://.import/Oozenator.mp3-2e17031c8be383011b2c2d341c7b4573.mp3str" ]
+
+[params]
+
+loop=true
+loop_offset=0

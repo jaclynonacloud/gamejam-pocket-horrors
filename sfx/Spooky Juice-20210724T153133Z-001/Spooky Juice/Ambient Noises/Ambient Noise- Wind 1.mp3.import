@@ -1,0 +1,15 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+path="res://.import/Ambient Noise- Wind 1.mp3-8002c94b5db330a657c5bdb2658b30b2.mp3str"
+
+[deps]
+
+source_file="res://sfx/Spooky Juice-20210724T153133Z-001/Spooky Juice/Ambient Noises/Ambient Noise- Wind 1.mp3"
+dest_files=[ "res://.import/Ambient Noise- Wind 1.mp3-8002c94b5db330a657c5bdb2658b30b2.mp3str" ]
+
+[params]
+
+loop=true
+loop_offset=0

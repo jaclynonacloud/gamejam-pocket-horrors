@@ -1,0 +1,15 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+path="res://.import/Damage Noise 3- Oof!.mp3-b56dc0cb80fcd5bf2720d7dd729b8f00.mp3str"
+
+[deps]
+
+source_file="res://sfx/Spooky Juice-20210724T153133Z-001/Spooky Juice/Damage and Hit Noises/Damage Noise 3- Oof!.mp3"
+dest_files=[ "res://.import/Damage Noise 3- Oof!.mp3-b56dc0cb80fcd5bf2720d7dd729b8f00.mp3str" ]
+
+[params]
+
+loop=false
+loop_offset=0

@@ -1,8 +1,9 @@
-[gd_scene load_steps=4 format=2]
+[gd_scene load_steps=5 format=2]
 
 [ext_resource path="res://scenes/entities/shared/mutations/eyes/EyesMutation.gd" type="Script" id=1]
 [ext_resource path="res://custom/resources/stats/StatsResource.tres" type="Resource" id=2]
 [ext_resource path="res://scenes/actions/eye/EyeAction.tscn" type="PackedScene" id=3]
+[ext_resource path="res://sfx/Spooky Juice-20210724T153133Z-001/Spooky Juice/Damage and Hit Noises/Hit Noise 3- Weird.mp3" type="AudioStream" id=4]
 
 [node name="EyesMutation" type="Spatial"]
 script = ExtResource( 1 )
@@ -15,3 +16,4 @@ trait_slot_key = "eye"
 action_resource = ExtResource( 3 )
 base_stats = ExtResource( 2 )
 attack_key = "ATTACK_EVIL_EYE"
+audio_hit = ExtResource( 4 )

@@ -1,6 +1,9 @@
 extends Node
 
 export var important_colour:Color = Color.white
+export var fail_colour:Color = Color.white
+
+export var progress_update_sfx:AudioStream = null
 
 export var actions_map:Dictionary = {
 	"action_primary": Reference,
@@ -13,9 +16,11 @@ export var horrors:Dictionary = {
 	"HORROR_EYECU": Reference
 }
 
-# Attempts to find a token replacement..
+# Attempts to find a token replacement.
 func find_token_replacement(token:String):
 	match token:
 		"important_colour":
 			return "#%s" % important_colour.to_html()
+		"fail_colour":
+			return "#%s" % fail_colour.to_html()
 	return ""

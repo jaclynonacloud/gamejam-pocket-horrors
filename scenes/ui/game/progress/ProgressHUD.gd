@@ -23,6 +23,7 @@ var flavour_text:String = "" setget set_flavour_text
 func _ready():
 	Globals.connect("progression_updated", self, "_progress_updated")
 	
+	yield(get_tree(), "idle_frame")
 	# grab initial progression
 	update_progress(0.0)
 	
@@ -44,6 +45,9 @@ func update_progress(value:float):
 		current_marker = next_marker
 		# change our flavour text!
 		self.flavour_text = progress_marker_text.values()[current_marker]
+		
+		# play sfx
+		Globals.play_sfx(Globals.customs.progress_update_sfx)
 		
 		# send a notif for fun
 		Globals.game_ui.notifications.queue_notification("MESSAGE_WEARY")

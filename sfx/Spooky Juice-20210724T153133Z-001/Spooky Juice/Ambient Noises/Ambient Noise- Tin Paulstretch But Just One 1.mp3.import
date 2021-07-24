@@ -1,0 +1,15 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+path="res://.import/Ambient Noise- Tin Paulstretch But Just One 1.mp3-3673f99c6f2c58aa3e03cec629554f44.mp3str"
+
+[deps]
+
+source_file="res://sfx/Spooky Juice-20210724T153133Z-001/Spooky Juice/Ambient Noises/Ambient Noise- Tin Paulstretch But Just One 1.mp3"
+dest_files=[ "res://.import/Ambient Noise- Tin Paulstretch But Just One 1.mp3-3673f99c6f2c58aa3e03cec629554f44.mp3str" ]
+
+[params]
+
+loop=false
+loop_offset=0

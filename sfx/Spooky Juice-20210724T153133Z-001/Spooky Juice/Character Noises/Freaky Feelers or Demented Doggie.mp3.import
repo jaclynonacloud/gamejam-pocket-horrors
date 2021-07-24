@@ -1,0 +1,15 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+path="res://.import/Freaky Feelers or Demented Doggie.mp3-efc3f1a45585376966892fd0caa95d63.mp3str"
+
+[deps]
+
+source_file="res://sfx/Spooky Juice-20210724T153133Z-001/Spooky Juice/Character Noises/Freaky Feelers or Demented Doggie.mp3"
+dest_files=[ "res://.import/Freaky Feelers or Demented Doggie.mp3-efc3f1a45585376966892fd0caa95d63.mp3str" ]
+
+[params]
+
+loop=true
+loop_offset=0

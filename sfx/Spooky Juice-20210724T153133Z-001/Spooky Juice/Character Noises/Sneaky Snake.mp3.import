@@ -1,0 +1,15 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+path="res://.import/Sneaky Snake.mp3-d8462994cf309f15ca2bb90c5010513e.mp3str"
+
+[deps]
+
+source_file="res://sfx/Spooky Juice-20210724T153133Z-001/Spooky Juice/Character Noises/Sneaky Snake.mp3"
+dest_files=[ "res://.import/Sneaky Snake.mp3-d8462994cf309f15ca2bb90c5010513e.mp3str" ]
+
+[params]
+
+loop=true
+loop_offset=0

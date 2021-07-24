@@ -1,0 +1,15 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+path="res://.import/Hit Noise 1.mp3-49eb5608438f9df73a6c21b5d3591886.mp3str"
+
+[deps]
+
+source_file="res://sfx/Spooky Juice-20210724T153133Z-001/Spooky Juice/Damage and Hit Noises/Hit Noise 1.mp3"
+dest_files=[ "res://.import/Hit Noise 1.mp3-49eb5608438f9df73a6c21b5d3591886.mp3str" ]
+
+[params]
+
+loop=true
+loop_offset=0

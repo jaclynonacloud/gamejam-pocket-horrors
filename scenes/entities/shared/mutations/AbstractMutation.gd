@@ -31,13 +31,21 @@ export var attack_key:String = ""
 export var attack_power:float = 1.0 setget , get_attack_power
 export var attack_cooldown:float = 2.0
 
-onready var action:Node = action_resource.instance()
+export var audio_hit:AudioStreamMP3
+
+var action:Node = null
 
 var stats:Dictionary = {} setget , get_stats
 
 var current_cooldown:float = -1.0
 var current_lifetime:int = 0
 var type:String = "" setget , get_type
+var is_degraded:bool = false setget , get_is_degraded
+
+func _ready():
+	if action_resource != null:
+		action = action_resource.instance()
+		add_child(action)
 
 
 func get_type():
@@ -46,6 +54,8 @@ func get_type():
 			return "TYPE_WINGS"
 		MutationTypes.Eyes:
 			return "TYPE_EYES"
+		MutationTypes.Gore:
+			return "TYPE_GORE"
 	return "TYPE_UNKNOWN"
 			
 # Resets the mutation.
@@ -56,6 +66,10 @@ func reset():
 # Renews the lifetime of the mutation.
 func renew():
 	current_lifetime = 0
+	
+# Degrades the lifetime of this mutation
+func degrade():
+	current_lifetime += 1
 
 # Resets the cooldown.
 func reset_cooldown():
@@ -86,6 +100,8 @@ func get_power():
 func get_attack_power():
 	return attack_power * self.power
 	
+func get_is_degraded():
+	return current_lifetime >= lifetime
 	
 func get_stats():
 	var tmp_stats:Dictionary = Tools.get_stats_from(base_stats)

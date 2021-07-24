@@ -33,6 +33,7 @@ func _player_mutations_changed(mutations:Array):
 	
 	actions = {}
 	for key in player_actions.keys():
+		if !player_actions[key].show_in_ui: continue
 		add_action(key, player_actions[key].readable)
 		
 func _player_fight_range_detected(entered:bool):
@@ -59,6 +60,7 @@ func _action_just_released(action_name:String, layer:String):
 	for key in world_actions.keys():
 		if action_name == key:
 			Globals.do_action(action_name)
+			return
 	
 	for key in actions.keys():
 		if action_name == key:

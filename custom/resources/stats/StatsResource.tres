@@ -4,15 +4,15 @@
 
 [resource]
 script = ExtResource( 1 )
-stat_max_health = 0.0
+stat_max_health = 10.0
 stat_max_defense = 0.0
-stat_max_strength = 1.0
-stat_max_speed = -1.0
-stat_damage = 4.0
-stat_accuracy = -6.0
+stat_max_strength = 0.0
+stat_max_speed = 0.0
+stat_damage = 0.0
+stat_accuracy = 0.0
 stat_bleed = 0.0
 stat_stun = 0.0
-stat_resistance_cold = -1.0
-stat_resistance_fire = -4.0
-stat_resistance_ice = -0.2
-stat_resistance_underwater = -8.0
+stat_resistance_cold = 0.0
+stat_resistance_fire = 0.0
+stat_resistance_ice = 0.0
+stat_resistance_underwater = 0.0

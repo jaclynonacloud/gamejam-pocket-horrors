@@ -52,7 +52,6 @@ Battle with your pocket horror until you become the apex monster in the universe
         - [x] Damage, Accuracy, Resistance (Fire, Cold, Water, Underwater)
     - [x] Create Mutation Trait Base (Lifetime, Power, Stats)
 - [ ] Horror Interactions
-    - [ ] Create Follow Behaviour
     - [x] Create Chase Behaviour
     - [ ] Create Flee Behaviour
 - [ ] Fighting System
@@ -78,6 +77,8 @@ Battle with your pocket horror until you become the apex monster in the universe
 - [ ] Horror Navigation
     - [ ] Fix Chasing
     - [ ] Fix Fight Distance
+- [ ] Base Stats Needs to be Rewritten
+    - [ ] Remove Unused Stats
 
 ### Stretch Milestones
 - [ ] Custom Settings

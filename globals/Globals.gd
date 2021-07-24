@@ -12,6 +12,7 @@ onready var ground_material:Material = preload("res://materials/NoiseMaterial.tr
 
 var player:Spatial = null
 var navigation:Navigation = null
+var game:Spatial = null
 var game_camera:Spatial = null
 var game_ui:Control = null
 
@@ -38,6 +39,7 @@ func progress(value:float):
 func start_fight():
 	# if the fight starts successfully, update!
 	if game_ui.fight.start_fight(Globals.player.attacks, Globals.player.fight_targets):
+		yield(get_tree(), "idle_frame")
 		Inputs.push_layer(Inputs.INPUT_LAYER_FIGHT)
 	# otherwise, just update our ui
 	else:
@@ -69,6 +71,21 @@ func use_hyper_mode(state:bool=true):
 	if state:
 		yield(get_tree().create_timer(1.0), "timeout")
 		ground_material.set_shader_param("hyper_mode", false)
+		
+		
+# Plays ambience.
+func play_ambience(audio:AudioStream):
+	if game.ambience_player == null:
+		yield(get_tree(), "idle_frame")
+	game.ambience_player.stream = audio
+	game.ambience_player.play()
+	
+# Plays sound effect.
+func play_sfx(audio:AudioStream):
+	if game.sfx_player == null:
+		yield(get_tree(), "idle_frame")
+	game.sfx_player.stream = audio
+	game.sfx_player.play()
 
 
 # Parses out translation tokens.

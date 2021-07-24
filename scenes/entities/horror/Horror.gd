@@ -8,7 +8,6 @@ const NAVIGATION_STUCK_MARGIN:float = 0.05
 
 export var key:String = "" setget , get_key
 export var readable:String = ""
-export (String, "SPECIES_BLOB", "SPECIES_BUTTERFLY", "SPECIES_EYE") var species:String = ""
 export var navigation_path:NodePath
 export var navigation_point_margin:float = 1.0 setget , get_navigation_point_margin # how close before the point is considered reached
 export var stuck_check_interval:float = NAVIGATION_STUCK_CHECK_INTERVAL
@@ -23,6 +22,8 @@ export var fight_distance:float = 20.0 setget , get_fight_distance # how close t
 export var attack_interval:float = 1.0 # determines how often a horror will look to attack
 
 onready var navigation:Navigation = get_node_or_null(navigation_path)
+onready var ambience_audio:AudioStreamPlayer3D = $AmbienceAudio
+onready var damaged_audio:AudioStreamPlayer3D = $DamagedAudio
 
 var navigation_points:PoolVector3Array = []
 # stuck check
@@ -73,6 +74,17 @@ func attack(attack, target:Spatial):
 	# provide the attack
 	target.take_damage(attack, self)
 	attack.current_cooldown = 0.0
+	
+	
+## [Override]
+#func take_damage(attack, caller:Spatial):
+#	if !.take_damage(attack, caller):
+#		print("We dead do something!")
+#	else:
+#		if damaged_audio != null:
+#			print("Damage me bro!")
+#			damaged_audio.play()
+	
 
 # [Override]
 func ready():
@@ -131,8 +143,7 @@ func calculate_movement(delta:float):
 	
 # Sets up a horros.  Used after spawning.
 func setup(_size:float=1.0):
-	# setup health
-	health = self.max_health
+	print("health: %s/%s" % [health, self.max_health])
 	
 	# setup scale
 	self.size = _size
@@ -147,6 +158,10 @@ func setup(_size:float=1.0):
 	
 	last_position = translation
 	change_collider_size()
+	
+	yield(get_tree(), "idle_frame")
+	# setup health
+	heal_full()
 	
 # Rescales the horror.
 func rescale():
@@ -232,6 +247,7 @@ func fight(target:Spatial, force_fight:bool=false) -> bool:
 		navigation_points = []
 		navigation_complete()
 		self.fight_target = target
+		velocity = Vector3.ZERO
 		return true
 		
 	# start fighting if in distance
@@ -354,6 +370,27 @@ func get_attacks():
 		results[mutation.attack_key] = mutation
 #		results[mutation.attack_key] = {  "power": mutation.attack_power, "cooldown": mutation.attack_cooldown, "type": mutation.get_mutation_readable() }
 	return results
+	
+# [Override]
+func set_size(value:float):
+	.set_size(value)
+	
+	# update audio affectiveness
+	var size_ratio:float = size / MAX_SIZE
+	var max_db:float = 15.0
+	var min_db:float = -11.0
+	
+	if ambience_audio != null:
+		ambience_audio.unit_size = size_ratio * 6.0
+		ambience_audio.unit_db = (max_db - min_db) * size_ratio + min_db
+		
+	# pitching
+	var min_pitch:float = 0.8
+	var max_pitch:float = 3.0
+	
+	if damaged_audio != null:
+		var pitch:float = (1.0 - (min_pitch / max_pitch)) * size_ratio + min_pitch
+		damaged_audio.pitch_scale = pitch
 
 func get_level():
 	return ceil(self.size * 100) / 35.0

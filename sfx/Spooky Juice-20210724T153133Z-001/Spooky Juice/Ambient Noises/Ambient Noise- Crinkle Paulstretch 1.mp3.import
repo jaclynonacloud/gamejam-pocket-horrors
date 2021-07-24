@@ -1,0 +1,15 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+path="res://.import/Ambient Noise- Crinkle Paulstretch 1.mp3-7b3375f0a29f35aca7b68e4dde06e816.mp3str"
+
+[deps]
+
+source_file="res://sfx/Spooky Juice-20210724T153133Z-001/Spooky Juice/Ambient Noises/Ambient Noise- Crinkle Paulstretch 1.mp3"
+dest_files=[ "res://.import/Ambient Noise- Crinkle Paulstretch 1.mp3-7b3375f0a29f35aca7b68e4dde06e816.mp3str" ]
+
+[params]
+
+loop=true
+loop_offset=0

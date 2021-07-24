@@ -3,7 +3,6 @@ extends "res://scenes/entities/AbstractEntity.gd"
 signal mutations_changed(mutations)
 signal nearby_horrors_changed(horrors)
 signal fight_range_detected(state)
-signal size_changed(size)
 
 const CHECK_FOR_SAFE_POSITION_INTERVAL:float = 2.0
 
@@ -15,6 +14,7 @@ onready var traits_container:Node = $CollisionShape/Meshes/Sprite3D/TraitsContai
 onready var horror_area:Area = $CollisionShape/Meshes/HorrorArea
 onready var health_area:Area = $CollisionShape/Meshes/HealthArea
 onready var camera_target:Spatial = $CollisionShape/Meshes/CameraTarget
+onready var light:SpotLight = $Light
 
 var stats:Dictionary = {} setget , get_stats
 var nearby_horrors:Array = []
@@ -52,6 +52,11 @@ func _health_area_updated(area:Node, entered:bool):
 	else:
 		nearby_health = null
 	Globals.emit_signal("health_available", entered, nearby_health)
+	
+	
+func _unhandled_key_input(event):
+	if event.pressed && event.scancode == KEY_Z:
+		global_transform.origin = Vector3.ZERO
 	
 # [Overide]
 func ready():
@@ -189,15 +194,6 @@ func take_damage(attack, caller:Spatial):
 	# update our ui
 	Globals.game_ui.fight.update_player_data()
 	
-# Heals the entity!
-func heal(amount:float):
-	print("Healed by: %s" % amount)
-	health = clamp(health + amount, 0.0, self.max_health)
-	emit_signal("health_updated", health, self.max_health)
-	
-func heal_full():
-	heal(self.max_health)
-	
 # Respawns us at last safe position.
 func respawn():
 	global_transform.origin = last_safe_position
@@ -224,6 +220,9 @@ func finish_fight():
 		mute.get_parent().remove_child(mute)
 		mute.reset()
 		
+		# degrade lifetime of our current mutations
+		for m in current_mutations:
+			m.degrade()
 		# if our mutations container already holds a mutation of this type, renew it
 		for m in current_mutations:
 			# reset our cooldowns
@@ -234,6 +233,7 @@ func finish_fight():
 		
 		
 		# if we have too many mutations, find the weakest ones and YEET them
+		print("size vs mutes: %s - %s" % [mutations.size(), max_mutations])
 		if mutations.size() >= max_mutations:
 			var weakest:Node = mutations[0]
 			# find our weakest mutation and toss it
@@ -243,12 +243,16 @@ func finish_fight():
 				if lifeage > weakest_lifeage:
 					weakest = m
 			# erase the weakest
+			if weakest.action != null:
+				weakest.action.deactivate()
 			mutations.erase(weakest)
 			weakest.queue_free()
 		
 		
 		mutations_container.add_child(mute)
 		mutations.append(mute)
+		if mute.action != null:
+			mute.action.activate(self)
 		
 		# count how many times we receive this mutation so we can send notifications
 		if mutations_collection.get(mute.readable, null) == null:
@@ -280,7 +284,18 @@ func finish_fight():
 	base_attack.reset_cooldown()
 	
 	# update progression!
-	Globals.progress(size_inc) # increment at LEAST two points every time
+	Globals.progress(size_inc * 2.0)
+	
+	# any mutations that are degraded, capture them, yeet them and display a notification
+	var removed_mutations:Dictionary = {}
+	for m in mutations_container.get_children():
+		if m.is_degraded:
+			if removed_mutations.has(m.readable):
+				removed_mutations[m.readable] += 1
+			else:
+				removed_mutations[m.readable] = 1
+			m.queue_free()
+			mutations.erase(m)
 		
 	# tailor our mutations conllection to only include those mutations that have been successfully kept in the mutations
 	for mute_key in mutations_collection.keys():
@@ -301,6 +316,7 @@ func finish_fight():
 			ceil(size_inc * 10.0),
 			Globals.translate("SIZE_METRIC")
 		])
+	# mutated
 	for mute_key in mutations_collection.keys():
 		var amount:int = mutations_collection[mute_key]
 		notif_ui.queue_notification("%s %s%s" % [
@@ -308,6 +324,15 @@ func finish_fight():
 				Globals.translate(mute_key),
 				"" if amount == 1 else " x%s" % amount
 			])
+	# lost
+	for mute_key in removed_mutations.keys():
+		var amount:int = removed_mutations[mute_key]
+		notif_ui.queue_notification("%s %s%s" % [
+				Globals.translate("MESSAGE_MUTATION_LOST"),
+				Globals.translate(mute_key),
+				"" if amount == 1 else " x%s" % amount
+			])
+		
 	notif_ui.next_notification()
 	
 	
@@ -365,6 +390,7 @@ func update_traits():
 	# set our bodily traits
 	traits_container.clear_traits()
 	for mute in mutations_container.get_children():
+		if !is_instance_valid(mute): continue
 		if mute.trait_slot_key != "":
 			traits_container.add_trait(mute.trait_slot_key, 1)
 	
@@ -372,6 +398,7 @@ func update_traits():
 func get_actions():
 	var results:Dictionary = {}
 	for mute in mutations_container.get_children():
+		if !is_instance_valid(mute): continue
 		if mute.action != null:
 			results[mute.action.action_name] = mute.action
 			
@@ -381,6 +408,7 @@ func get_actions():
 func get_attacks():
 	var results:Dictionary = .get_attacks()
 	for mutation in mutations:
+		if !is_instance_valid(mutation): continue
 		results[mutation.attack_key] = mutation
 #		results[mutation.attack_key] = {  "power": mutation.attack_power, "cooldown": mutation.attack_cooldown, "type": mutation.get_mutation_readable() }
 	return results
@@ -389,6 +417,7 @@ func get_attacks():
 func get_base_attack_power():
 	var result:float = base_attack_power * self.size
 	for mutation in mutations:
+		if !is_instance_valid(mutation): continue
 		result += (mutation.base_stats.stat_damage * 0.3) * self.size
 	return result
 
@@ -398,6 +427,7 @@ func get_stats():
 	# include all mutations
 	if mutations_container != null:
 		for mutation in mutations:
+			if !is_instance_valid(mutation): continue
 			results = Tools.add_float_dictionaries(results, mutation.stats)
 	return results
 

@@ -7,5 +7,7 @@
 script = ExtResource( 1 )
 key = "mutation_wings"
 readable = "MUTATION_WINGS"
+attack_billboard_key = "ATTACK_WING"
+trait_slot_key = "wing"
 base_stats = ExtResource( 2 )
-attack_key = "ATTACK_JARRING_WING"
+attack_key = "ATTACK_WING"

@@ -56,6 +56,7 @@ func clear_outputs():
 	
 # Draws a path on the screen.
 func add_path(key:String, points:PoolVector3Array, color:Color=Color.red):
+	return # don't do this for now
 	screen_draw.add_path(key, points, color)
 	
 # Removes a path on the screen.

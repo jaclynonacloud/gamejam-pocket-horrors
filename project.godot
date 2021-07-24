@@ -34,6 +34,10 @@ Globals="*res://globals/Globals.gd"
 
 window/size/always_on_top=true
 
+[editor_plugins]
+
+enabled=PoolStringArray( "res://addons/zylann.scatter/plugin.cfg" )
+
 [input]
 
 move_left={
@@ -72,18 +76,20 @@ action_secondary={
 }
 action_pickup={
 "deadzone": 0.5,
-"events": [ Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":0,"alt":false,"shift":false,"control":false,"meta":false,"command":false,"pressed":false,"scancode":81,"unicode":0,"echo":false,"script":null)
+"events": [ Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":0,"alt":false,"shift":false,"control":false,"meta":false,"command":false,"pressed":false,"scancode":70,"unicode":0,"echo":false,"script":null)
  ]
 }
 action_fight={
 "deadzone": 0.5,
-"events": [ Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":0,"alt":false,"shift":false,"control":false,"meta":false,"command":false,"pressed":false,"scancode":70,"unicode":0,"echo":false,"script":null)
+"events": [ Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":0,"alt":false,"shift":false,"control":false,"meta":false,"command":false,"pressed":false,"scancode":69,"unicode":0,"echo":false,"script":null)
  ]
 }
 
 [layer_names]
 
+3d_render/layer_1="Spooky"
 3d_physics/layer_1="all"
+3d_render/layer_2="Regular"
 3d_physics/layer_2="horrors"
 3d_physics/layer_3="health"
 3d_physics/layer_4="smoll_things"
