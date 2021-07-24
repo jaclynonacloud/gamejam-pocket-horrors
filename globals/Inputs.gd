@@ -2,9 +2,11 @@ extends Node
 
 signal input_layer_changed(layer, last_layer)
 signal action_just_released(action, layer)
+signal action_just_pressed(action, layer)
 
 const INPUT_LAYER_MAIN:String = "input_layer_main"
 const INPUT_LAYER_GAME:String = "input_layer_game"
+const INPUT_LAYER_FIGHT:String = "input_layer_fight"
 
 var layers:Array = []
 var active_layer:String = "" setget , get_active_layer
@@ -15,6 +17,13 @@ func _process(delta):
 	var hor:float = Input.get_action_strength("move_right") - Input.get_action_strength("move_left")
 	var ver:float = Input.get_action_strength("move_down") - Input.get_action_strength("move_up")
 	move_axis = Vector2(hor, ver).normalized()
+	
+	# process event map
+	for action_name in InputMap.get_actions():
+		if Input.is_action_just_pressed(action_name):
+			emit_signal("action_just_pressed", action_name, self.active_layer)
+		elif Input.is_action_just_released(action_name):
+			emit_signal("action_just_released", action_name, self.active_layer)
 
 # Adds an input layer to the top of the stack.
 func push_layer(layer:String):

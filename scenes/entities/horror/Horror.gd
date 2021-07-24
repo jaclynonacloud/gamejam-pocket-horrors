@@ -3,7 +3,6 @@ extends "res://scenes/entities/AbstractEntity.gd"
 
 signal navigation_completed()
 
-const MAX_SIZE:float = 10.0
 const NAVIGATION_STUCK_CHECK_INTERVAL:float = 3.0 # if our horror has not moved enough in x time, time them out
 const NAVIGATION_STUCK_MARGIN:float = 0.05
 
@@ -85,11 +84,7 @@ func ready():
 	meshes_container.scale = desired_scale
 	
 	yield(get_tree(), "idle_frame")
-	# start the next behaviour
-	next_behaviour()
-	
-	last_position = translation
-	change_collider_size()
+	setup()
 
 # [Override]
 func process(delta:float):
@@ -130,6 +125,31 @@ func calculate_movement(delta:float):
 	var direction:Vector3 = pos * self.speed * delta * vel
 	callv("apply_central_impulse", [direction])
 	
+# Sets up a horros.  Used after spawning.
+func setup(_size:float=1.0):
+	# setup health
+	health = self.max_health
+	
+	# setup scale
+	self.size = _size
+	rescale()
+	
+	# find navigation
+	if navigation == null:
+		navigation = Globals.navigation
+		
+	# start the next behaviour
+	next_behaviour()
+	
+	last_position = translation
+	change_collider_size()
+		
+	print("All set up!")
+	
+# Rescales the horror.
+func rescale():
+	# scale the horror only once
+	meshes_container.scale = desired_scale
 	
 # Determines next desired behaviour.
 func next_behaviour():
@@ -201,9 +221,18 @@ func update_behaviour(target:Spatial):
 		chase(target)
 	
 	
-func fight(target:Spatial) -> bool:
-	if fight_target != null: return false # we don't want to fight anyone else until the current fight is resolved
+func fight(target:Spatial, force_fight:bool=false) -> bool:
+	if fight_target != null && !force_fight: return false # we don't want to fight anyone else until the current fight is resolved
 	var distance:float = target.global_transform.origin.distance_to(global_transform.origin)
+	
+	# if we are forcing the fight, we don't care about distance!!
+	if force_fight:
+		stop_chasing()
+		navigation_points = []
+		navigation_complete()
+		self.fight_target = target
+		return true
+		
 	# start fighting if in distance
 	if distance <= self.fight_distance:
 		self.fight_target = target
@@ -307,10 +336,6 @@ func navigation_complete():
 	next_behaviour()
 	
 	emit_signal("navigation_completed")
-	
-# Gets the size multiplier.
-func get_size_multiplier():
-	return ((size / MAX_SIZE) + 0.3)
 
 func get_key():
 	if key == "": return name
@@ -333,11 +358,13 @@ func get_level():
 	return ceil(self.size * 100) / 35.0
 	
 func get_chase_distance():
-	return chase_distance
+	return 0
+#	return chase_distance
 #	return chase_distance + chase_distance * (get_size_multiplier() * 0.10)
 	
 func get_fight_distance():
-	return fight_distance
+	return 0
+#	return fight_distance
 #	return fight_distance + fight_distance * (get_size_multiplier() * 0.05)
 	
 func get_is_chasing():

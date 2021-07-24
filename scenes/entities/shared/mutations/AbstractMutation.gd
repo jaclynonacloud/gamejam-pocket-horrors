@@ -23,6 +23,7 @@ export var power:float = 1.0 setget , get_power # the multiplicity of how powerf
 export (float, 0.0, 1.0, 0.01) var chance:float = 1.0 # chances of getting mutation from drop
 export var attack_billboard_key:String = "ATTACK_SLAP"
 export var trait_slot_key:String = ""
+export var action_resource:Resource
 
 export var base_stats:Resource
 
@@ -30,11 +31,14 @@ export var attack_key:String = ""
 export var attack_power:float = 1.0 setget , get_attack_power
 export var attack_cooldown:float = 2.0
 
+onready var action:Node = action_resource.instance()
+
 var stats:Dictionary = {} setget , get_stats
 
 var current_cooldown:float = -1.0
 var current_lifetime:int = 0
 var type:String = "" setget , get_type
+
 
 func get_type():
 	match mutation_type:

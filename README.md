@@ -74,6 +74,11 @@ Battle with your pocket horror until you become the apex monster in the universe
 - [ ] End
     - [ ] Summon Eldritch God (Let's Use Loop Hero-like Progression)
 
+### Must Fixes
+- [ ] Horror Navigation
+    - [ ] Fix Chasing
+    - [ ] Fix Fight Distance
+
 ### Stretch Milestones
 - [ ] Custom Settings
     - [ ] Add Custom Keybinding

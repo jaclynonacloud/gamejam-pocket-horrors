@@ -27,7 +27,7 @@ func update_health():
 func set_readable(value:String):
 	readable = value
 	
-	if readable_node != null: readable_node.text = readable
+	if readable_node != null: readable_node.text = Globals.translate(readable)
 	
 func set_level(value:int):
 	level = value

@@ -40,7 +40,8 @@ margin_bottom = 62.0
 anchor_left = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-margin_left = -320.0
+margin_left = -370.0
+grow_horizontal = 0
 mouse_filter = 2
 size_flags_horizontal = 3
 custom_constants/margin_right = 35
@@ -54,21 +55,21 @@ __meta__ = {
 [node name="VBoxContainer" type="VBoxContainer" parent="AttacksContainer"]
 margin_left = 35.0
 margin_top = 15.0
-margin_right = 285.0
+margin_right = 335.0
 margin_bottom = 585.0
-rect_min_size = Vector2( 250, 0 )
+rect_min_size = Vector2( 300, 0 )
 mouse_filter = 2
 size_flags_horizontal = 8
 alignment = 2
 
 [node name="PlayerItem" parent="AttacksContainer/VBoxContainer" instance=ExtResource( 4 )]
 margin_top = 502.0
-margin_right = 250.0
+margin_right = 300.0
 margin_bottom = 532.0
 
 [node name="AttacksList" type="VBoxContainer" parent="AttacksContainer/VBoxContainer"]
 margin_top = 536.0
-margin_right = 250.0
+margin_right = 300.0
 margin_bottom = 570.0
 rect_min_size = Vector2( 250, 0 )
 mouse_filter = 2
@@ -76,4 +77,4 @@ size_flags_horizontal = 8
 alignment = 2
 
 [node name="AttackItem" parent="AttacksContainer/VBoxContainer/AttacksList" instance=ExtResource( 1 )]
-margin_right = 250.0
+margin_right = 300.0

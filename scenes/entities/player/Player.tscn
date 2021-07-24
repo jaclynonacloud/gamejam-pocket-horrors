@@ -14,7 +14,7 @@
 radius = 2.38953
 height = 1.80064
 
-[sub_resource type="SpriteFrames" id=4]
+[sub_resource type="SpriteFrames" id=2]
 animations = [ {
 "frames": [ ExtResource( 1 ), ExtResource( 8 ) ],
 "loop": true,
@@ -30,15 +30,17 @@ animations = [ {
 "speed": 1.0
 } ]
 
-[sub_resource type="SphereShape" id=2]
-radius = 22.1199
+[sub_resource type="SphereShape" id=4]
+radius = 4.318
 
 [node name="Player" type="KinematicBody" groups=[
 "player",
 ]]
+collision_mask = 9
 script = ExtResource( 2 )
 base_health = 20.0
 base_stats = ExtResource( 3 )
+fight_range = 7.0
 
 [node name="CollisionShape" type="CollisionShape" parent="."]
 transform = Transform( 1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 3.33742, -1.19232 )
@@ -53,7 +55,8 @@ transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.339689, 0 )
 layers = 2
 centered = false
 offset = Vector2( -240, 0 )
-frames = SubResource( 4 )
+frames = SubResource( 2 )
+frame = 1
 playing = true
 
 [node name="TraitsContainer" parent="CollisionShape/Meshes/Sprite3D" instance=ExtResource( 7 )]
@@ -87,14 +90,24 @@ transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.337, 0 )
 [node name="CameraTarget" type="Position3D" parent="CollisionShape/Meshes"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.17143, 0 )
 
-[node name="Mutations" type="Spatial" parent="."]
+[node name="HealthArea" type="Area" parent="CollisionShape/Meshes"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1.19209e-07 )
+monitorable = false
+collision_layer = 4
+collision_mask = 4
 
-[node name="EyesMutation" parent="Mutations" instance=ExtResource( 9 )]
+[node name="CollisionShape" type="CollisionShape" parent="CollisionShape/Meshes/HealthArea"]
+shape = SubResource( 4 )
 
-[node name="HorrorArea" type="Area" parent="."]
+[node name="HorrorArea" type="Area" parent="CollisionShape/Meshes"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1.19209e-07 )
 monitorable = false
 collision_layer = 2
 collision_mask = 2
 
-[node name="CollisionShape" type="CollisionShape" parent="HorrorArea"]
-shape = SubResource( 2 )
+[node name="CollisionShape" type="CollisionShape" parent="CollisionShape/Meshes/HorrorArea"]
+shape = SubResource( 4 )
+
+[node name="Mutations" type="Spatial" parent="."]
+
+[node name="EyesMutation" parent="Mutations" instance=ExtResource( 9 )]

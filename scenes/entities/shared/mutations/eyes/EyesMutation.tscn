@@ -1,7 +1,8 @@
-[gd_scene load_steps=3 format=2]
+[gd_scene load_steps=4 format=2]
 
 [ext_resource path="res://scenes/entities/shared/mutations/eyes/EyesMutation.gd" type="Script" id=1]
 [ext_resource path="res://custom/resources/stats/StatsResource.tres" type="Resource" id=2]
+[ext_resource path="res://scenes/actions/eye/EyeAction.tscn" type="PackedScene" id=3]
 
 [node name="EyesMutation" type="Spatial"]
 script = ExtResource( 1 )
@@ -11,5 +12,6 @@ mutation_type = 4
 lifetime = 4
 attack_billboard_key = "ATTACK_EYE"
 trait_slot_key = "eye"
+action_resource = ExtResource( 3 )
 base_stats = ExtResource( 2 )
 attack_key = "ATTACK_EVIL_EYE"

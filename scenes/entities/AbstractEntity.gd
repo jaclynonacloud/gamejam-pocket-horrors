@@ -2,6 +2,8 @@ extends PhysicsBody
 
 signal health_updated(current_health, max_health)
 
+const MAX_SIZE:float = 10.0
+
 export var move_speed:float = 5.0
 export var gravity:float = 2.0
 export (float, 0.0, 1.0, 0.01) var move_slide:float = 0.35
@@ -132,6 +134,19 @@ func change_collider_size():
 	cc.scale = sc
 	var col_origin:Spatial = collision_shape_origin if collision_shape_origin != null else get_node("Meshes/CollisionOrigin")
 	cc.global_transform.origin = col_origin.global_transform.origin
+	
+# Gets the size multiplier.
+func get_size_multiplier():
+	return ((size / MAX_SIZE) + 0.3)
+
+func set_size(value:float):
+	size = value
+	var sc:Vector3 = Vector3.ONE * max(0.01, size - 0.5)
+	var mc:Spatial = meshes_container if meshes_container != null else get_node("Meshes")
+	desired_scale = sc
+	
+	emit_signal("size_changed", size)
+
 		
 func get_speed():
 	return move_speed
@@ -153,9 +168,3 @@ func get_max_health():
 	for mutation in mutations:
 		result += mutation.base_stats.stat_max_health * self.size
 	return result
-
-func set_size(value:float):
-	size = value
-	var sc:Vector3 = Vector3.ONE * max(0.01, size - 0.5)
-	var mc:Spatial = meshes_container if meshes_container != null else get_node("Meshes")
-	desired_scale = sc

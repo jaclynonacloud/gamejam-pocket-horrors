@@ -1,0 +1,24 @@
+keys,en
+HORROR_EYECU,EyeCU
+HORROR_BUTTERFLY,The Bumbler
+HORROR_GORE,Agoreable George
+ATTACK_SLAP,Slap
+ATTACK_EVIL_EYE,Evil Eye
+ATTACK_WING,Frantic Flap
+TYPE_NORMAL,Normal
+TYPE_EYES,Accuracy
+MUTATION_EYES,Eye Mutation
+ACTION_EYE,Eye Spy
+SIZE_METRIC,souls
+PROGRESS_0, 
+PROGRESS_2,The skies are quiet.
+PROGRESS_15,The smell of anguish lingers in your nostrils.
+PROGRESS_30,A forboding taste lines your lips.
+PROGRESS_50,The ground quakes softly beneath you.
+PROGRESS_75,The chants of the tall ones plagues your ears.
+PROGRESS_100,Ambeaux the Almighty has arisen!
+MESSAGE_MUTATION_DETECTED,[color={important_colour}]Mutating...[/color]
+MESSAGE_SIZE_INCREASED,Size increasing by
+MESSAGE_WEARY,You feel very weary.
+MESSAGE_HEALTH_PICKUP,Consume Blood Gem
+MESSAGE_FIGHT,Fight Horrors

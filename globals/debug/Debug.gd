@@ -7,7 +7,11 @@ var outputs:Dictionary = {}
 
 func _ready():
 	# read in some general data
+	Globals.connect("progression_updated", self, "_progression_updated")
 	Globals.player.connect("mutations_changed", self, "_mutations_changed")
+	
+func _progression_updated(progress:float):
+	add_output("progress", str(progress))
 	
 func _mutations_changed(mutations:Array):
 	var mutes:Dictionary = {}

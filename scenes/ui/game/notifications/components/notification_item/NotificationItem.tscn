@@ -19,10 +19,12 @@ __meta__ = {
 }
 readable_node_path = NodePath("Label")
 
-[node name="Label" type="Label" parent="."]
+[node name="Label" type="RichTextLabel" parent="."]
 margin_left = 15.0
 margin_top = 5.0
 margin_right = 435.0
-margin_bottom = 19.0
-text = "Notification Text"
-autowrap = true
+margin_bottom = 20.0
+bbcode_enabled = true
+bbcode_text = "[u]Mutation[/u] Eye mutation"
+text = "Mutation Eye mutation"
+fit_content_height = true
