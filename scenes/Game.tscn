@@ -6,7 +6,7 @@
 [ext_resource path="res://scenes/entities/player/Player.tscn" type="PackedScene" id=4]
 [ext_resource path="res://scenes/objects/game_camera/GameCamera.tscn" type="PackedScene" id=5]
 [ext_resource path="res://scenes/ui/game/GameUI.tscn" type="PackedScene" id=6]
-[ext_resource path="res://scenes/entities/horror/eyecu/Eyecu.tscn" type="PackedScene" id=7]
+[ext_resource path="res://scenes/objects/kill_floor/KillFloor.tscn" type="PackedScene" id=7]
 [ext_resource path="res://scenes/objects/blood_gem/BloodGem.tscn" type="PackedScene" id=8]
 [ext_resource path="res://scenes/objects/spawner/Spawner.tscn" type="PackedScene" id=9]
 
@@ -121,7 +121,6 @@ material = SubResource( 2 )
 [node name="Player" parent="GameLayer" instance=ExtResource( 4 )]
 move_speed = 15.0
 move_slide = 0.25
-size = 3.0
 
 [node name="OmniLight" type="SpotLight" parent="GameLayer/Player"]
 transform = Transform( 1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 12.6874, 0 )
@@ -135,22 +134,6 @@ target_path = NodePath("../Player")
 
 [node name="GameUI" parent="GameLayer" instance=ExtResource( 6 )]
 
-[node name="Eyecu" parent="GameLayer" instance=ExtResource( 7 )]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 10.3101, 0, 16.1278 )
-size = 0.9
-navigation_path = NodePath("../Navigation")
-
-[node name="Eyecu2" parent="GameLayer" instance=ExtResource( 7 )]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 13.158, 0, 13.6132 )
-size = 0.9
-navigation_path = NodePath("../Navigation")
-
-[node name="Eyecu3" parent="GameLayer" instance=ExtResource( 7 )]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 18.3375, 0, 22.3122 )
-size = 0.9
-species = "SPECIES_EYE"
-navigation_path = NodePath("../Navigation")
-
 [node name="MainBloodGem" parent="." instance=ExtResource( 8 )]
 transform = Transform( 1.72369, 0, 0, 0, 1.72369, 0, 0, 0, 1.72369, -4.7139, 0, 6.02066 )
 health_percent = 0.25
@@ -159,5 +142,7 @@ health_percent = 0.25
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 7.35479, 1.90735e-06, 0.630054 )
 spawns = [ 0 ]
 spawn_range = 2.952
-min_size = 3.0
-max_size = 4.0
+min_size = 0.8
+max_size = 1.2
+
+[node name="KillFloor" parent="." instance=ExtResource( 7 )]

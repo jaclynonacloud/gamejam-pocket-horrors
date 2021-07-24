@@ -26,9 +26,6 @@ func _timer_completed():
 func queue_notification(message:String, force_next_message:bool=false):
 	notifications.append(message)
 	
-	print("Notifications")
-	print(notifications)
-	
 	notifications_timer.start()
 	if force_next_message:
 		next_notification()

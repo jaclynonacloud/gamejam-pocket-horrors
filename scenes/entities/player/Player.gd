@@ -5,6 +5,8 @@ signal nearby_horrors_changed(horrors)
 signal fight_range_detected(state)
 signal size_changed(size)
 
+const CHECK_FOR_SAFE_POSITION_INTERVAL:float = 2.0
+
 export var base_stats:Resource
 export var max_mutations:int = 10
 export var fight_range:float = 10.0 setget , get_fight_range
@@ -26,17 +28,21 @@ var nearby_health:Node = null
 var can_move:bool = true setget , get_can_move
 var is_in_fight_range:bool = false
 
+var last_safe_position:Vector3 = Vector3.ZERO
+var last_safe_position_interval:float = 0.0
+
 func _init():
 	Globals.player = self
 	
 func _nearby_horror_updated(body:Node, entered:bool):
+	# if we are currently fighting, ignore any horror requests
+	if fight_targets.size() > 0: return
+	
 	if entered:
 		nearby_horrors.append(body)
 	else:
 		nearby_horrors.erase(body)
 		
-	print("Horrors updated")
-	Tools.print_node_names(nearby_horrors)
 	emit_signal("nearby_horrors_changed", nearby_horrors)
 	emit_signal("fight_range_detected", !nearby_horrors.empty())
 	
@@ -113,20 +119,13 @@ func process(delta:float):
 	if !is_close_to_scale:
 		meshes_container.scale = meshes_container.scale.linear_interpolate(desired_scale, 0.9 * delta)
 		
-	# see if we are close enough to FIGHT someone! (:<
-#	var is_close_enough:bool = false
-	var is_close_enough:bool = !nearby_horrors.empty()
-#	for horror in nearby_horrors:
-#		var distance:float = global_transform.origin.distance_to(horror.global_transform.origin)
-#		if distance <= self.fight_range:
-#			print("Distance to: %s is %s : %s" % [horror.name, distance, self.fight_range])
-#			is_close_enough = true
-#			break
-			
-#	if is_close_enough != is_in_fight_range:
-#		emit_signal("fight_range_detected", is_close_enough)
-#
-#	is_in_fight_range = is_close_enough
+	# update safe position
+	last_safe_position_interval += delta
+	if last_safe_position_interval > CHECK_FOR_SAFE_POSITION_INTERVAL:
+		last_safe_position_interval = 0.0
+		var result:Dictionary = get_world().direct_space_state.intersect_ray(global_transform.origin + Vector3.UP * 3.5, global_transform.origin + Vector3.DOWN * 15.0, [self])
+		if result.get("position"):
+			last_safe_position = result.position
 		
 	
 # Will determine how many times this mutation has been picked up by the Player, so we can amplify the attack.
@@ -138,7 +137,17 @@ func get_mutation_recurrence(mutation) -> int:
 			recurrence += 1
 	return recurrence
 	
-# Attacks all fight targets.
+# [Override]
+func alert_of_death(target:Spatial):
+	if nearby_horrors.has(target):
+		nearby_horrors.erase(target)
+	if fight_targets.has(target):
+		fight_targets.erase(target)
+		# restart fight
+		if fight_targets.size() > 0:
+			trigger_fight()
+	
+# [Override]
 func attack(attack, target:Spatial):
 	print("Attacking with: %s" % attack.attack_key)
 	if attack != null:
@@ -152,7 +161,6 @@ func attack(attack, target:Spatial):
 		
 		for horror in fight_targets:
 			if !horror.take_damage(attack, self):
-				print("Kill me softly!")
 				# add horror to killed targets, so we can do fight finish when done
 				if !killed_targets.has(horror):
 					killed_targets.append(horror)
@@ -183,21 +191,25 @@ func take_damage(attack, caller:Spatial):
 	
 # Heals the entity!
 func heal(amount:float):
+	print("Healed by: %s" % amount)
 	health = clamp(health + amount, 0.0, self.max_health)
 	emit_signal("health_updated", health, self.max_health)
 	
 func heal_full():
 	heal(self.max_health)
 	
+# Respawns us at last safe position.
+func respawn():
+	global_transform.origin = last_safe_position
+	velocity = Vector3.ZERO
+	
 # This triggers all nearby horrors to FIGHT US!
 func trigger_fight():
-	print("trigger FIGHT!!")
 	for horror in nearby_horrors:
 		horror.fight(self, true)
 	self.fight_targets = nearby_horrors
 			
 func finish_fight():
-	print("Finish fight!!")
 	# go through all of our killed targets, and absorb them
 	var all_mutations:Array = []
 	for horror in killed_targets:
@@ -251,10 +263,15 @@ func finish_fight():
 	# increase our size based on the amount of horrors killed
 	var size_inc:float = 0.0
 	for horror in killed_targets:
-		size_inc += horror.size * 0.1
+		# size needs to be relative to our current size, so that small creatures don't buff us up as much
+		var size_diff:float = horror.size / self.size
+		size_inc += (horror.size * size_diff) * 0.1
+	print("Size UP! %s" % size_inc)
 		
 	self.size += size_inc
-	change_collider_size()
+	# if a size increase, update us
+	if size_inc > 0.0:
+		change_collider_size()
 
 	update_traits()
 	
@@ -263,7 +280,7 @@ func finish_fight():
 	base_attack.reset_cooldown()
 	
 	# update progression!
-	Globals.progress(size_inc + 2.0) # increment at LEAST two points every time
+	Globals.progress(size_inc) # increment at LEAST two points every time
 		
 	# tailor our mutations conllection to only include those mutations that have been successfully kept in the mutations
 	for mute_key in mutations_collection.keys():
@@ -294,6 +311,11 @@ func finish_fight():
 	notif_ui.next_notification()
 	
 	
+	# heal by size of horrors defeated
+	var heal_amount:float = size_inc * 15.0
+	heal(heal_amount)
+	
+	
 	yield(get_tree(), "idle_frame")
 	
 	emit_signal("mutations_changed", mutations_container.get_children())
@@ -303,13 +325,14 @@ func finish_fight():
 	fight_targets = []
 	killed_targets = []
 	
+	pulse_horror_area()
+	
 # Tries to do an action!
 func do_action(action_name:String):
 	
 	# handle global actions first
 	match action_name:
 		"internal_pickup_health":
-			print("Picup!")
 			if nearby_health != null:
 				heal(self.max_health * nearby_health.health_percent) # heal by gem percent
 				nearby_health.use()
@@ -330,7 +353,6 @@ func calculate_movement(delta:float):
 # Pulses the horror area.
 func pulse_horror_area():
 	nearby_horrors = []
-	print("Pulsing the horror area")
 	horror_area.set_collision_layer_bit(1, false)
 	var col:CollisionShape = horror_area.get_node("CollisionShape")
 	col.disabled = true

@@ -93,19 +93,27 @@ func calculate_movement(delta:float):
 	translation = translation.move_toward(translation + velocity, self.speed * delta)
 	
 
+# Lets entity know about death of another.  Usually used when someone falls into the kill floor.
+func alert_of_death(target:Spatial): pass
+
 # The entity attacks! Supply a node with some attack data so we can let the target decide how much damage to take.
 func attack(attack, target:Spatial): pass
 
 # The entity takes damage!  Will return false if they hit 0.0, meaning they are dead.
 func take_damage(attack, caller:Spatial) -> bool:
 	var amount:float = attack.power
+		
 	
 	if caller == Globals.player:
-		# add recurrence power
-		var recurrence:int = caller.get_mutation_recurrence(attack)
-		if recurrence > 1:
-			amount += attack.power * recurrence * 0.3
-			print("Up the power! %s %s" % [attack.get("key"), amount])
+		# if this is a base attack, include the caller's base stats too
+		if attack is BaseAttack:
+			amount = attack.power * caller.get_base_attack_power()
+			
+		else:
+			# add recurrence power
+			var recurrence:int = caller.get_mutation_recurrence(attack)
+			if recurrence > 1:
+				amount += attack.power * recurrence * 0.3
 	
 #	var strength:float = attack.power + self.base_attack_power
 #	# lessen the power by the amount of engaged horrors
@@ -116,6 +124,10 @@ func take_damage(attack, caller:Spatial) -> bool:
 #	attack.current_cooldown = 0.0
 		
 	health = max(0.0, health - amount)
+	if health < 1.0:
+		health = 0.0
+	
+	print("Ive taken damage! %s: %s" % [name, health])
 	
 	emit_signal("health_updated", health, self.max_health)
 	
@@ -129,8 +141,6 @@ func take_damage(attack, caller:Spatial) -> bool:
 func change_collider_size():
 	var sc:Vector3 = Vector3.ONE * max(0.01, size - 0.5)
 	var cc:Spatial = collision_shape if collision_shape != null else get_node("CollisionShape")
-	print("SC")
-	print(sc)
 	cc.scale = sc
 	var col_origin:Spatial = collision_shape_origin if collision_shape_origin != null else get_node("Meshes/CollisionOrigin")
 	cc.global_transform.origin = col_origin.global_transform.origin

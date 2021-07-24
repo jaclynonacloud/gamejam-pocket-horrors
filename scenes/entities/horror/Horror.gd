@@ -44,6 +44,11 @@ var fight_target:Spatial = null setget set_fight_target
 var fight_position:Vector3 = Vector3.ZERO
 var fighting_data:Array = [] # generate this data whenever a fight target is engaged
 var attack_timer:Timer = Timer.new() # determines how often a horror will check to do an attack
+
+func _exit_tree():
+	# let fight target know we are DEAD
+	if fight_target != null:
+		fight_target.alert_of_death(self)
 	
 # Called by the behaviour timer.
 func _update_behaviour():
@@ -52,7 +57,6 @@ func _update_behaviour():
 		
 # Called by the attack timer.
 func _do_next_attack():
-	print("Try attack!!")
 	var atks:Dictionary = self.attacks
 	# read our attacks and find one that is not currently cooling down
 	var attack_keys:Array = atks.keys()
@@ -143,8 +147,6 @@ func setup(_size:float=1.0):
 	
 	last_position = translation
 	change_collider_size()
-		
-	print("All set up!")
 	
 # Rescales the horror.
 func rescale():
@@ -205,7 +207,6 @@ func chase(target:Spatial):
 func stop_chasing():
 	chase_target = null
 	chase_exhaustion = -1.0
-	print("Done chasing")
 	
 	
 # Updates the horror behaviour.

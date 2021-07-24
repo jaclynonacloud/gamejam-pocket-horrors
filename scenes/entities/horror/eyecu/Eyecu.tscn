@@ -47,10 +47,8 @@ transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.743494, 0 )
 centered = false
 offset = Vector2( -325, 0 )
 billboard = 1
-shaded = true
 frames = SubResource( 4 )
 animation = "idle"
-frame = 1
 playing = true
 
 [node name="EyesMutation" parent="Mutations" index="0" instance=ExtResource( 3 )]

@@ -37,9 +37,6 @@ func push_layer(layer:String):
 	if last_layer != layer:
 		emit_signal("input_layer_changed", layer, last_layer)
 		
-	print("layers")
-	print(layers)
-		
 # Pops off the top input layer from the stack.
 func pop_layer() -> String:
 	if layers.size() > 1:

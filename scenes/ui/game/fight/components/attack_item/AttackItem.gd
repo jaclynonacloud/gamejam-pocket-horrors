@@ -34,9 +34,7 @@ func set_cooldown(value:float):
 	
 func set_readable(value:String):
 	readable = value
-	
-	print("Readable key: %s - translation: %s" % [readable, Globals.translate(readable)])
-	
+		
 	if readable_node != null: readable_node.text = Globals.translate(readable)
 	
 func set_power(value:int):

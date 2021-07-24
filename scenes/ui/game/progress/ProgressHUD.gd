@@ -51,7 +51,6 @@ func update_progress(value:float):
 	# update our progress
 	self.progress = value
 	
-	print("UPDATED WITH TEXT: %s" % flavour_text)
 	# IF our flavour text is empty, assume to hide this
 	if flavour_text == "" && flavour_text != " ":
 		hide_progress()
@@ -77,5 +76,4 @@ func set_flavour_text(value:String):
 	flavour_text = value
 	
 	if flavour_text_node != null:
-		print("CHANGE ME %s" % flavour_text)
 		flavour_text_node.text = Globals.translate(flavour_text)

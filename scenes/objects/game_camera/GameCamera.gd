@@ -50,7 +50,6 @@ func focus(_target:Spatial):
 	
 	if target.get("size"):
 		_size_changed(target.size)
-		print("Start size: %s" % target.size)
 	target.connect("size_changed", self, "_size_changed")
 	
 func fight_camera():

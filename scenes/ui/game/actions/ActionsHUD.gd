@@ -36,7 +36,6 @@ func _player_mutations_changed(mutations:Array):
 		add_action(key, player_actions[key].readable)
 		
 func _player_fight_range_detected(entered:bool):
-	print("Fight detected: %s" % entered)
 	if entered:
 		world_actions["action_fight"] = "MESSAGE_FIGHT"
 	else:
