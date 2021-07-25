@@ -10,6 +10,7 @@ onready var billboards:Node = preload("res://globals/billboards/BillboardsLayer.
 onready var customs:Node = preload("res://globals/custom/CustomsManager.tscn").instance()
 onready var ground_material:Material = preload("res://materials/NoiseMaterial.tres")
 
+var main:Node = null
 var player:Spatial = null
 var navigation:Navigation = null
 var game:Spatial = null
@@ -31,6 +32,15 @@ func _ready():
 # Add progression!
 func progress(value:float):
 	progression = min(progression + value, required_progression)
+	
+	if progression >= required_progression:
+		Globals.main.end_menu(true)
+		
+	# brighten our ambient light as a reward -- after 50%
+	var percent:float = (progression / (required_progression / 2)) - 0.5
+	if game != null:
+		if game.ambient_light != null:
+			game.ambient_light.light_energy = max(0.0, percent)
 	
 	emit_signal("progression_updated", float(progression / required_progression) * 100.0)
 	

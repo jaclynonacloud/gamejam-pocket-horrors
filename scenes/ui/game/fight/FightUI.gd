@@ -79,8 +79,6 @@ func _attack_selected(attack_key:String):
 		
 # Starts the fight ui. Returns false if fight was already started.
 func start_fight(attacks:Dictionary, horrors:Array=[]) -> bool:
-	print("HOrrors")
-	print(horrors)
 	if visible: return false
 	show_ui()
 	update_attacks_list()
@@ -146,6 +144,9 @@ func update_horrors_list():
 	clear_horrors_list()
 	
 	for horror in raw_horrors:
+		if !is_instance_valid(horror): continue
+		if horror == null: continue
+		if horror.is_rotting: continue
 		var item:Control = horrors_item_instance.duplicate()
 		horrors_list_container.add_child(item)
 		item.readable = horror.readable

@@ -418,7 +418,7 @@ func set_size(value:float):
 	var min_db:float = -11.0
 	
 	if ambience_audio != null:
-		ambience_audio.unit_size = size_ratio * 15.0
+#		ambience_audio.unit_size = size_ratio * 15.0
 		ambience_audio.unit_db = (max_db - min_db) * (size_ratio * 1.3) + min_db
 		
 	# pitching

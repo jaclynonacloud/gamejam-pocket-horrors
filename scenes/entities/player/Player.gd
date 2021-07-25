@@ -173,6 +173,9 @@ func attack(attack, target:Spatial):
 #		attack.current_cooldown = 0.0
 		
 		for horror in fight_targets:
+			if !is_instance_valid(horror): continue
+			if horror == null: continue
+			if horror.is_rotting: continue
 			if !horror.take_damage(attack, self):
 				# add horror to killed targets, so we can do fight finish when done
 				if !killed_targets.has(horror):
@@ -207,6 +210,7 @@ func take_damage(attack, caller:Spatial):
 		is_dead = true
 		yield(damage_audio, "finished")
 		print("End Game Slate!")
+		Globals.main.end_menu(false)
 	
 	# update our ui
 	Globals.game_ui.fight.update_player_data()
@@ -366,6 +370,9 @@ func finish_fight():
 	var heal_amount:float = size_inc * 15.0
 	heal(heal_amount)
 	
+	# if we don't have a tree assume we are dead ):<
+	if !is_instance_valid(get_tree()):
+		Globals.main.end_menu(false)
 	
 	yield(get_tree(), "idle_frame")
 	
@@ -378,6 +385,7 @@ func finish_fight():
 		
 	fight_targets = []
 	killed_targets = []
+	attacking_targets = []
 	
 	pulse_horror_area()
 	
@@ -449,6 +457,9 @@ func get_base_attack_power():
 		if !is_instance_valid(mutation): continue
 		result += (mutation.base_stats.stat_damage * 0.3) * self.size
 	return result
+	
+func get_speed():
+	return move_speed + (10.0 * self.size)
 
 func get_stats():
 	# get base stats

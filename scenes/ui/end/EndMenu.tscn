@@ -22,6 +22,7 @@ script = ExtResource( 10 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
+lose_image_path = NodePath("LoseImage")
 
 [node name="WinImage" type="TextureRect" parent="."]
 margin_right = 1280.0
@@ -109,6 +110,7 @@ margin_bottom = 720.0
 alignment = 2
 
 [node name="VBoxContainer" type="VBoxContainer" parent="HBoxContainer"]
+visible = false
 margin_right = 508.0
 margin_bottom = 720.0
 size_flags_horizontal = 3
@@ -198,27 +200,26 @@ text = "MUTE 1 x 8
 MUTE 2 x 8"
 
 [node name="Spacer" type="MarginContainer" parent="HBoxContainer"]
-margin_left = 512.0
-margin_right = 1021.0
+margin_right = 850.0
 margin_bottom = 720.0
 size_flags_horizontal = 3
 size_flags_stretch_ratio = 2.0
 
 [node name="MarginContainer" type="MarginContainer" parent="HBoxContainer"]
-margin_left = 1025.0
+margin_left = 854.0
 margin_right = 1280.0
 margin_bottom = 720.0
 size_flags_horizontal = 3
 custom_constants/margin_right = 65
 
 [node name="ControlsContainer" type="VBoxContainer" parent="HBoxContainer/MarginContainer"]
-margin_right = 190.0
+margin_right = 361.0
 margin_bottom = 720.0
 alignment = 1
 
 [node name="PlayAgain" type="Button" parent="HBoxContainer/MarginContainer/ControlsContainer"]
 margin_top = 317.0
-margin_right = 190.0
+margin_right = 361.0
 margin_bottom = 358.0
 mouse_default_cursor_shape = 2
 text = "PLAY_AGAIN"
@@ -226,7 +227,7 @@ script = ExtResource( 1 )
 
 [node name="Quit" type="Button" parent="HBoxContainer/MarginContainer/ControlsContainer"]
 margin_top = 362.0
-margin_right = 190.0
+margin_right = 361.0
 margin_bottom = 403.0
 mouse_default_cursor_shape = 2
 text = "QUIT"

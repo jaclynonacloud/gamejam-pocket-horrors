@@ -21,7 +21,7 @@ func _process(delta:float):
 		camera.shake(amount)
 		
 		if current_hold_time > HOLD_TIME:
-			print("Return to main menu!!!")
+			Globals.main.main_menu()
 			current_hold_time = -1.0
 	
 func _action_just_pressed(action_name:String, layer:String):

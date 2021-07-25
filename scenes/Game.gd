@@ -3,6 +3,7 @@ extends Spatial
 onready var navigation:Navigation = $GameLayer/Navigation
 onready var ambience_player:AudioStreamPlayer = $Audio/Ambience
 onready var sfx_player:AudioStreamPlayer = $Audio/SFX
+onready var ambient_light:DirectionalLight = $AmbientLight
 
 func _init():
 	Globals.game = self
