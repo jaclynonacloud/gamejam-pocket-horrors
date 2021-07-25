@@ -52,6 +52,8 @@ func end_fight():
 	Inputs.remove_layer(Inputs.INPUT_LAYER_FIGHT)
 	# hide fight ui
 	Globals.game_ui.fight.end_fight()
+	# end the fight camera
+	Globals.game_camera.end_fight_camera()
 	
 # Tries to do a global action.
 func do_action(action_name:String):
@@ -62,7 +64,8 @@ func do_action(action_name:String):
 				player.do_action("internal_pickup_health")
 				
 		"action_fight":
-			player.trigger_fight()
+			if player.trigger_fight():
+				Globals.game_camera.fight_camera()
 
 # Toggle Hyper Mode.
 func use_hyper_mode(state:bool=true):

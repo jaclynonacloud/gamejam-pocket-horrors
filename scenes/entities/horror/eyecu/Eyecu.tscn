@@ -27,9 +27,9 @@ animations = [ {
 } ]
 
 [node name="Eyecu" instance=ExtResource( 1 )]
-move_speed = 15.0
 key = "eyecu"
 readable = "HORROR_EYECU"
+move_range = 10.0
 chase_distance = 20.0
 fight_distance = 7.0
 attack_interval = 3.0
@@ -49,9 +49,17 @@ billboard = 1
 shaded = true
 frames = SubResource( 4 )
 animation = "idle"
+frame = 1
 playing = true
 
+[node name="BillboardOrigin" parent="Meshes" index="3"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.10307, 0.373381 )
+
 [node name="EyesMutation" parent="Mutations" index="0" instance=ExtResource( 3 )]
+power = 3.0
 
 [node name="AmbienceAudio" parent="." index="3"]
 stream = ExtResource( 4 )
+
+[node name="DamagedAudio" parent="." index="4"]
+unit_db = -21.107

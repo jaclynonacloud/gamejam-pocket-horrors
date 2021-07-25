@@ -1,0 +1,157 @@
+[gd_scene load_steps=10 format=2]
+
+[ext_resource path="res://graphics/ui/main/main1.png" type="Texture" id=1]
+[ext_resource path="res://graphics/ui/main/main2.png" type="Texture" id=2]
+[ext_resource path="res://scenes/ui/main/MainMenu.gd" type="Script" id=3]
+[ext_resource path="res://scenes/ui/shared/Readable.gd" type="Script" id=4]
+[ext_resource path="res://scenes/ui/shared/ReadableButton.gd" type="Script" id=5]
+[ext_resource path="res://graphics/PocketHorrorsTheme.tres" type="Theme" id=6]
+[ext_resource path="res://graphics/fonts/TitleFont.tres" type="DynamicFont" id=7]
+[ext_resource path="res://graphics/fonts/ButtonFont.tres" type="DynamicFont" id=8]
+
+[sub_resource type="StyleBoxFlat" id=1]
+bg_color = Color( 0.0313726, 0.0431373, 0.129412, 1 )
+
+[node name="MainMenu" type="PanelContainer"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+theme = ExtResource( 6 )
+custom_styles/panel = SubResource( 1 )
+script = ExtResource( 3 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+splash_node_1_path = NodePath("HBoxContainer/SplashContainer/Splash1")
+splash_node_2_path = NodePath("HBoxContainer/SplashContainer/Splash2")
+splash_interval = 1.5
+
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
+margin_right = 1280.0
+margin_bottom = 720.0
+
+[node name="SplashContainer" type="AspectRatioContainer" parent="HBoxContainer"]
+margin_right = 638.0
+margin_bottom = 720.0
+grow_vertical = 0
+rect_clip_content = true
+size_flags_horizontal = 3
+size_flags_vertical = 3
+stretch_mode = 0
+alignment_vertical = 2
+
+[node name="Splash1" type="TextureRect" parent="HBoxContainer/SplashContainer"]
+margin_top = 82.0
+margin_right = 638.0
+margin_bottom = 720.0
+grow_vertical = 0
+size_flags_vertical = 3
+texture = ExtResource( 1 )
+expand = true
+stretch_mode = 7
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Splash2" type="TextureRect" parent="HBoxContainer/SplashContainer"]
+visible = false
+margin_top = 82.0
+margin_right = 638.0
+margin_bottom = 720.0
+grow_vertical = 0
+size_flags_vertical = 3
+texture = ExtResource( 2 )
+expand = true
+stretch_mode = 7
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="VBoxContainer" type="VBoxContainer" parent="HBoxContainer"]
+margin_left = 642.0
+margin_right = 1280.0
+margin_bottom = 720.0
+size_flags_horizontal = 3
+alignment = 1
+
+[node name="Readable" type="Label" parent="HBoxContainer/VBoxContainer"]
+margin_top = 188.0
+margin_right = 638.0
+margin_bottom = 248.0
+custom_fonts/font = ExtResource( 7 )
+custom_colors/font_color = Color( 0.92549, 0.0588235, 0.0588235, 1 )
+custom_colors/font_color_shadow = Color( 0.121569, 0.372549, 0.690196, 1 )
+custom_constants/shadow_offset_x = 0
+custom_constants/shadow_offset_y = 2
+text = "POCKET_HORRORS"
+align = 1
+script = ExtResource( 4 )
+
+[node name="DescriptionContainer" type="MarginContainer" parent="HBoxContainer/VBoxContainer"]
+margin_top = 252.0
+margin_right = 638.0
+margin_bottom = 273.0
+custom_constants/margin_right = 25
+custom_constants/margin_left = 25
+
+[node name="Description" type="RichTextLabel" parent="HBoxContainer/VBoxContainer/DescriptionContainer"]
+margin_left = 25.0
+margin_right = 613.0
+margin_bottom = 21.0
+size_flags_horizontal = 3
+custom_colors/default_color = Color( 1, 1, 1, 0.717647 )
+bbcode_enabled = true
+text = "POCKET_HORRORS_DESCRIPTION"
+fit_content_height = true
+script = ExtResource( 4 )
+
+[node name="Things2Do" type="Label" parent="HBoxContainer/VBoxContainer"]
+margin_top = 277.0
+margin_right = 638.0
+margin_bottom = 302.0
+custom_fonts/font = ExtResource( 8 )
+custom_colors/font_color = Color( 0.705882, 0.105882, 0.105882, 1 )
+text = "THINGS_TO_DO"
+script = ExtResource( 4 )
+
+[node name="ListofThings" type="RichTextLabel" parent="HBoxContainer/VBoxContainer"]
+margin_top = 306.0
+margin_right = 638.0
+margin_bottom = 327.0
+text = "THINGS_TO_DO_LIST"
+fit_content_height = true
+script = ExtResource( 4 )
+
+[node name="VBoxContainer" type="VBoxContainer" parent="HBoxContainer/VBoxContainer"]
+margin_top = 331.0
+margin_right = 638.0
+margin_bottom = 531.0
+rect_min_size = Vector2( 0, 200 )
+custom_constants/separation = 15
+alignment = 1
+
+[node name="NewGame" type="Button" parent="HBoxContainer/VBoxContainer/VBoxContainer"]
+margin_left = 219.0
+margin_top = 51.0
+margin_right = 419.0
+margin_bottom = 92.0
+rect_min_size = Vector2( 200, 0 )
+mouse_default_cursor_shape = 2
+size_flags_horizontal = 4
+theme = ExtResource( 6 )
+text = "GAME_NEW"
+script = ExtResource( 5 )
+
+[node name="Quit" type="Button" parent="HBoxContainer/VBoxContainer/VBoxContainer"]
+margin_left = 219.0
+margin_top = 107.0
+margin_right = 419.0
+margin_bottom = 148.0
+rect_min_size = Vector2( 200, 0 )
+mouse_default_cursor_shape = 2
+size_flags_horizontal = 4
+theme = ExtResource( 6 )
+text = "QUIT"
+script = ExtResource( 5 )
+
+[connection signal="button_up" from="HBoxContainer/VBoxContainer/VBoxContainer/NewGame" to="." method="_new_game_pressed"]
+[connection signal="button_up" from="HBoxContainer/VBoxContainer/VBoxContainer/Quit" to="." method="_quit_pressed"]

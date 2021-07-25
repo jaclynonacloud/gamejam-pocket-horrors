@@ -1,9 +1,11 @@
-[gd_scene load_steps=7 format=2]
+[gd_scene load_steps=9 format=2]
 
 [ext_resource path="res://scenes/ui/game/fight/FightUI.tscn" type="PackedScene" id=1]
 [ext_resource path="res://scenes/ui/game/GameUI.gd" type="Script" id=2]
 [ext_resource path="res://scenes/ui/game/notifications/NotificationsUI.tscn" type="PackedScene" id=3]
 [ext_resource path="res://scenes/ui/game/fight/components/player_item/PlayerItem.tscn" type="PackedScene" id=4]
+[ext_resource path="res://scenes/ui/game/pauser/Pauser.tscn" type="PackedScene" id=5]
+[ext_resource path="res://graphics/PocketHorrorsTheme.tres" type="Theme" id=6]
 [ext_resource path="res://scenes/ui/game/actions/ActionsHUD.tscn" type="PackedScene" id=7]
 [ext_resource path="res://scenes/ui/game/progress/ProgressHUD.tscn" type="PackedScene" id=8]
 
@@ -11,6 +13,7 @@
 anchor_right = 1.0
 anchor_bottom = 1.0
 mouse_filter = 2
+theme = ExtResource( 6 )
 script = ExtResource( 2 )
 __meta__ = {
 "_edit_use_anchors_": false
@@ -32,14 +35,39 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="HealthHUD" parent="GameHUD" instance=ExtResource( 4 )]
-margin_left = 755.0
-margin_top = 555.0
-margin_right = 989.0
-margin_bottom = 585.0
-size_flags_horizontal = 8
-size_flags_vertical = 8
-
 [node name="ActionsHUD" parent="GameHUD" instance=ExtResource( 7 )]
+margin_top = 673.0
+margin_right = 1245.0
+margin_bottom = 705.0
 
 [node name="ProgressHUD" parent="GameHUD" instance=ExtResource( 8 )]
+margin_right = 1245.0
+margin_bottom = 705.0
+
+[node name="Pauser" parent="GameHUD" instance=ExtResource( 5 )]
+anchor_right = 0.0
+anchor_bottom = 0.0
+margin_left = 35.0
+margin_top = 15.0
+margin_right = 1245.0
+margin_bottom = 705.0
+
+[node name="HealthControl" type="Control" parent="GameHUD"]
+margin_left = 35.0
+margin_top = 15.0
+margin_right = 1245.0
+margin_bottom = 705.0
+
+[node name="HealthHUD" parent="GameHUD/HealthControl" instance=ExtResource( 4 )]
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = -243.0
+margin_top = -36.0
+margin_right = 0.0
+margin_bottom = 0.0
+grow_horizontal = 0
+grow_vertical = 0
+size_flags_horizontal = 0
+size_flags_vertical = 0

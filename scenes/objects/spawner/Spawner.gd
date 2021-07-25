@@ -13,6 +13,7 @@ export var max_spawns:int = 5
 export var spawn_range:float = 1.0 setget set_spawn_range
 export var min_size:float = 0.5
 export var max_size:float = 1.0
+export var prewarm:bool = true
 
 var active_spawns:Array = []
 var current_interval:float = 0.0
@@ -23,9 +24,11 @@ func _ready():
 	
 	yield(get_tree(), "idle_frame")
 	# start up spawner!
-	spawn()
+	if prewarm:
+		spawn()
 	
 func _process(delta:float):
+	if !visible: return
 	if Engine.editor_hint: return
 	# try to spawn another creature!
 	current_interval += delta
@@ -39,6 +42,7 @@ func _spawn_exiting(node:Node):
 
 # Picks an entity to spawn from the spawns list.  If force kill is set, game will kill the first spawn in active spawns.
 func spawn(force_kill:bool=false):
+	if !visible: return
 	if active_spawns.size() >= max_spawns:
 		if !force_kill: return
 		var front:Node = active_spawns.front()

@@ -1,4 +1,18 @@
 keys,en
+POCKET_HORRORS,Pocket Horrors
+POCKET_HORRORS_DESCRIPTION,Find yourself in a world brimming with [color={important_colour}]horrors[/color] of all shapes and sizes.  Fight these monstrosities and grow until you become the ultimate nightmare you were created to be.
+THINGS_TO_DO,Things to Do
+THINGS_TO_DO_LIST,\t- Fight all 3 Titan Horrors\n\t- Become the Ultimate God
+GAME_NEW,New Game
+QUIT,Quit
+PAUSE_WARNING,Keep Holding to Return to Main Menu
+FINAL_STATS,Final Stats
+STAT_TOTAL_KILLED,Total Horrors Killed
+STAT_TOTAL_MUTATIONS,Total Mutations
+STAT_FINAL_MUTATIONS,Final Mutations
+PLAY_AGAIN,Play Again
+WIN_TEXT,You've Become the Ultimate Horror!\nCongratulations!
+LOSE_TEXT,You've lost your way...\nYou lose.
 HORROR_EYECU,EyeCU
 HORROR_BUTTERFLY,The Bumbler
 HORROR_GORE,Agoreable George
@@ -20,8 +34,8 @@ PROGRESS_2,The skies are quiet.
 PROGRESS_15,The smell of anguish lingers in your nostrils.
 PROGRESS_30,A forboding taste lines your lips.
 PROGRESS_50,The ground quakes softly beneath you.
-PROGRESS_75,The chants of the tall ones plagues your ears.
-PROGRESS_100,Ambeaux the Almighty has arisen!
+PROGRESS_75,Shrieks pierce around you.
+PROGRESS_100,Horrifying achievement get!
 MESSAGE_MUTATION_DETECTED,[color={important_colour}]Mutating...[/color]
 MESSAGE_MUTATION_LOST,[color={fail_colour}]Losing...[/color]
 MESSAGE_SIZE_INCREASED,Size increasing by

@@ -79,6 +79,8 @@ func _attack_selected(attack_key:String):
 		
 # Starts the fight ui. Returns false if fight was already started.
 func start_fight(attacks:Dictionary, horrors:Array=[]) -> bool:
+	print("HOrrors")
+	print(horrors)
 	if visible: return false
 	show_ui()
 	update_attacks_list()

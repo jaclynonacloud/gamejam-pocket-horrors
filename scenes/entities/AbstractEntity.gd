@@ -13,13 +13,15 @@ export var base_attack_power:float = 1.0 setget , get_base_attack_power
 export var base_attack_cooldown:float = 1.0
 export var base_health:float = 10.0
 export (float, 0.1, 10.0, 0.05) var size:float = 1.0 setget set_size
+export var billboard_origin_path:NodePath
 
 onready var meshes_container:Spatial = $Meshes
 onready var collision_shape:CollisionShape = $CollisionShape
 onready var collision_shape_origin:Position3D = $Meshes/CollisionOrigin
 onready var sprite_container:Spatial = $Meshes/Sprite3D
 onready var mutations_container:Node = $Mutations
-onready var mutations:Array = mutations_container.get_children()
+onready var billboard_origin:Spatial = get_node(billboard_origin_path)
+onready var mutations:Array = mutations_container.get_children() setget , get_mutations
 onready var base_attack:BaseAttack = BaseAttack.new(base_attack_key, base_attack_power, base_attack_cooldown)
 
 var speed:float = move_speed setget , get_speed
@@ -38,6 +40,7 @@ class BaseAttack:
 	var attack_cooldown:float = 1.0
 	var current_cooldown:float = -1.0
 	var attack_billboard_key:String = "ATTACK_SLAP"
+	var extra_damage:float = 0.0
 	
 	func _init(_key:String, _power:float, _cooldown:float, _type:String="TYPE_NORMAL"):
 		attack_key = _key
@@ -108,7 +111,7 @@ func take_damage(attack, caller:Spatial) -> bool:
 	if caller == Globals.player:
 		# if this is a base attack, include the caller's base stats too
 		if attack is BaseAttack:
-			amount = attack.power * caller.get_base_attack_power() * 5.0
+			amount = attack.power * caller.get_base_attack_power()
 			
 		else:
 			# add recurrence power
@@ -132,11 +135,17 @@ func take_damage(attack, caller:Spatial) -> bool:
 	
 	emit_signal("health_updated", health, self.max_health)
 	
-	if health == 0.0:
+	if health <= 0.0:
 		print("We're DEAD!!")
+		call_death()
 		return false
 		
+	call_damage()
+		
 	return true
+	
+func call_death(): pass
+func call_damage(): pass
 	
 # Heals the entity!
 func heal(amount:float):
@@ -180,7 +189,7 @@ func get_base_attack_power():
 	var result:float = base_attack_power * self.size
 	for mutation in mutations:
 		if !is_instance_valid(mutation): continue
-		result += mutation.base_stats.stat_damage * self.size
+		result += mutation.extra_damage * self.size
 	return result
 	
 func get_health():
@@ -192,3 +201,13 @@ func get_max_health():
 		if !is_instance_valid(mutation): continue
 		result += mutation.base_stats.stat_max_health * self.size
 	return result
+	
+	
+func get_mutations():
+	var results:Array = []
+	for m in mutations:
+		if !is_instance_valid(m): continue
+		if m == null: continue
+		results.append(m)
+		
+	return results

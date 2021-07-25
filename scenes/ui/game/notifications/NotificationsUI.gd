@@ -1,5 +1,7 @@
 extends MarginContainer
 
+const MAX_NOTIFICATIONS_IN_QUEUE:int = 5
+
 export var notifications_container_path:NodePath
 export var notification_item_path:NodePath
 export var notification_duration:float = 2.0
@@ -9,24 +11,27 @@ onready var notification_item:Control = get_node(notification_item_path)
 #onready var notification_item_instance:Control = preload("res://scenes/ui/game/notifications/components/notification_item/NotificationItem.tscn").instance()
 
 var notifications:Array = []
-var notifications_timer:Timer = Timer.new()
+var current_interval:float = -1.0
 
 func _ready():
-	add_child(notifications_timer)
-	notifications_timer.wait_time = notification_duration
-	
 	notification_item.visible = false
 	
-	notifications_timer.connect("timeout", self, "_timer_completed")
-	
-func _timer_completed():
-	next_notification()
+func _process(delta:float):
+	if current_interval >= 0.0:
+		current_interval += delta
+		if current_interval > notification_duration:
+			current_interval = 0.0
+			next_notification()
 
 # Queues up a notification to play.
 func queue_notification(message:String, force_next_message:bool=false):
 	notifications.append(message)
 	
-	notifications_timer.start()
+	# if we have more than the max messages (spam), eat up any that are above
+	if notifications.size() >= MAX_NOTIFICATIONS_IN_QUEUE:
+		notifications.pop_front()
+	
+	current_interval = 0.0
 	if force_next_message:
 		next_notification()
 	
@@ -36,7 +41,7 @@ func next_notification():
 	
 	# if this was our last message, end the notifications!
 	if message == null:
-		notifications_timer.stop()
+		current_interval = -1.0
 		notification_item.visible = false
 		return
 		

@@ -16,4 +16,6 @@ trait_slot_key = "eye"
 action_resource = ExtResource( 3 )
 base_stats = ExtResource( 2 )
 attack_key = "ATTACK_EVIL_EYE"
+attack_power = 3.0
+extra_damage = 0.4
 audio_hit = ExtResource( 4 )

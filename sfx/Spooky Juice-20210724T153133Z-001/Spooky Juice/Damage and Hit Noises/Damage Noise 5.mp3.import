@@ -11,5 +11,5 @@ dest_files=[ "res://.import/Damage Noise 5.mp3-97f225d83c58050d85a4c1bb0ab3fc6b.
 
 [params]
 
-loop=true
+loop=false
 loop_offset=0

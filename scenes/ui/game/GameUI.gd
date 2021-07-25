@@ -3,7 +3,7 @@ extends Control
 onready var fight:Control = $FightUI
 onready var notifications:Control = $NotificationsUI
 onready var game_hud:Control = $GameHUD
-onready var health_hud:Control = $GameHUD/HealthHUD
+onready var health_hud:Control = $GameHUD/HealthControl/HealthHUD
 onready var actions_hud:Control = $GameHUD/ActionsHUD
 onready var progress_hud:Control = $GameHUD/ProgressHUD
 

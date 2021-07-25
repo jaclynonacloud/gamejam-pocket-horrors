@@ -30,6 +30,7 @@ export var base_stats:Resource
 export var attack_key:String = ""
 export var attack_power:float = 1.0 setget , get_attack_power
 export var attack_cooldown:float = 2.0
+export var extra_damage:float = 0.0
 
 export var audio_hit:AudioStreamMP3
 

@@ -6,9 +6,12 @@ onready var screen_draw:TextureRect = $Control/ScreenDraw
 var outputs:Dictionary = {}
 
 func _ready():
+	return
 	# read in some general data
 	Globals.connect("progression_updated", self, "_progression_updated")
-	Globals.player.connect("mutations_changed", self, "_mutations_changed")
+	
+	if Globals.player != null:
+		Globals.player.connect("mutations_changed", self, "_mutations_changed")
 	
 func _progression_updated(progress:float):
 	add_output("progress", str(progress))
@@ -31,6 +34,7 @@ func _mutations_changed(mutations:Array):
 
 # Adds an output.
 func add_output(key:String, text:String):
+	return
 	outputs[key] = text
 	update_outputs()
 	
@@ -41,6 +45,7 @@ func remove_output(key:String):
 	
 # Update the outputs
 func update_outputs():
+	return
 	clear_outputs()
 	
 	for key in outputs.keys():
@@ -56,7 +61,8 @@ func clear_outputs():
 	
 # Draws a path on the screen.
 func add_path(key:String, points:PoolVector3Array, color:Color=Color.red):
-	return # don't do this for now
+	return
+#	return # don't do this for now
 	screen_draw.add_path(key, points, color)
 	
 # Removes a path on the screen.
@@ -65,4 +71,5 @@ func remove_path(key:String):
 	
 # Draws a temporary point.
 func add_point(point:Vector3, color:Color=Color.blue, duration:float=1.0):
+	return
 	screen_draw.add_point(point, color, duration)

@@ -32,6 +32,8 @@ Globals="*res://globals/Globals.gd"
 
 [display]
 
+window/size/width=1280
+window/size/height=720
 window/size/always_on_top=true
 
 [editor_plugins]

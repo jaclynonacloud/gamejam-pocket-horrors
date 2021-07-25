@@ -15,13 +15,16 @@ onready var horror_area:Area = $CollisionShape/Meshes/HorrorArea
 onready var health_area:Area = $CollisionShape/Meshes/HealthArea
 onready var camera_target:Spatial = $CollisionShape/Meshes/CameraTarget
 onready var light:SpotLight = $Light
+onready var damage_audio:AudioStreamPlayer = $DamageAudio
 
 var stats:Dictionary = {} setget , get_stats
-var nearby_horrors:Array = []
+var nearby_horrors:Array = [] setget , get_nearby_horrors
 
 # fighting stuffs
-var fight_targets:Array = [] setget set_fight_targets
+var fight_targets:Array = [] setget set_fight_targets, get_fight_targets
+var attacking_targets:Array = []
 var killed_targets:Array = []
+var is_dead:bool = false
 
 var nearby_health:Node = null
 
@@ -43,8 +46,8 @@ func _nearby_horror_updated(body:Node, entered:bool):
 	else:
 		nearby_horrors.erase(body)
 		
-	emit_signal("nearby_horrors_changed", nearby_horrors)
-	emit_signal("fight_range_detected", !nearby_horrors.empty())
+	emit_signal("nearby_horrors_changed", self.nearby_horrors)
+	emit_signal("fight_range_detected", !self.nearby_horrors.empty())
 	
 func _health_area_updated(area:Node, entered:bool):
 	if entered:
@@ -54,9 +57,14 @@ func _health_area_updated(area:Node, entered:bool):
 	Globals.emit_signal("health_available", entered, nearby_health)
 	
 	
-func _unhandled_key_input(event):
-	if event.pressed && event.scancode == KEY_Z:
-		global_transform.origin = Vector3.ZERO
+#func _unhandled_key_input(event):
+#	if event.pressed && event.scancode == KEY_Z:
+#		global_transform.origin = Vector3.ZERO
+#	if event.pressed && event.scancode == KEY_L:
+#		print("Yes")
+#		self.size += 1.0
+#		change_collider_size()
+#		Globals.progress(10.0)
 	
 # [Overide]
 func ready():
@@ -114,7 +122,7 @@ func process(delta:float):
 		
 		
 	# update nearby horrors
-	for horror in nearby_horrors:
+	for horror in self.nearby_horrors:
 		# the horrors themselves will decide whether they want to engage
 		horror.update_behaviour(self)
 		
@@ -144,7 +152,7 @@ func get_mutation_recurrence(mutation) -> int:
 	
 # [Override]
 func alert_of_death(target:Spatial):
-	if nearby_horrors.has(target):
+	if self.nearby_horrors.has(target):
 		nearby_horrors.erase(target)
 	if fight_targets.has(target):
 		fight_targets.erase(target)
@@ -172,7 +180,7 @@ func attack(attack, target:Spatial):
 			# TODO: determine billboard hit!
 			else:
 				# hit them with a billboard!
-				Globals.billboards.use(attack.attack_billboard_key, horror.global_transform.origin + Vector3.UP * 3.0)
+				Globals.billboards.use(attack.attack_billboard_key, horror.billboard_origin.global_transform.origin)
 				
 		# check to see if we finished the fight!
 		var has_targets_left:bool = false
@@ -186,9 +194,18 @@ func attack(attack, target:Spatial):
 			
 # Damages the entity!
 func take_damage(attack, caller:Spatial):
-	var is_killed = .take_damage(attack, caller)
+	print("I got in here?")
+	if is_dead: return
+	
+	print("Im taking damage!")
+	print(attack)
+	var is_killed = !.take_damage(attack, caller)
+	
+	damage_audio.play()
 	
 	if is_killed:
+		is_dead = true
+		yield(damage_audio, "finished")
 		print("End Game Slate!")
 	
 	# update our ui
@@ -200,10 +217,16 @@ func respawn():
 	velocity = Vector3.ZERO
 	
 # This triggers all nearby horrors to FIGHT US!
-func trigger_fight():
-	for horror in nearby_horrors:
-		horror.fight(self, true)
-	self.fight_targets = nearby_horrors
+func trigger_fight(attack_target:Spatial=null):
+	if attack_target != null:
+		attacking_targets.append(attack_target)
+		self.fight_targets = attacking_targets
+	else:
+		for horror in self.nearby_horrors:
+			horror.fight(self, true)
+		self.fight_targets = self.nearby_horrors
+	
+	return !self.fight_targets.empty()
 			
 func finish_fight():
 	# go through all of our killed targets, and absorb them
@@ -235,18 +258,20 @@ func finish_fight():
 		# if we have too many mutations, find the weakest ones and YEET them
 		print("size vs mutes: %s - %s" % [mutations.size(), max_mutations])
 		if mutations.size() >= max_mutations:
-			var weakest:Node = mutations[0]
-			# find our weakest mutation and toss it
-			for m in mutations:
-				var weakest_lifeage:float = weakest.current_lifetime / weakest.lifetime
-				var lifeage:float = m.current_lifetime / m.lifetime
-				if lifeage > weakest_lifeage:
-					weakest = m
-			# erase the weakest
-			if weakest.action != null:
-				weakest.action.deactivate()
-			mutations.erase(weakest)
-			weakest.queue_free()
+			var weakest:Node = mutations.front()
+			if is_instance_valid(weakest):
+				# find our weakest mutation and toss it
+				for m in mutations:
+					if !is_instance_valid(m): continue
+					var weakest_lifeage:float = weakest.current_lifetime / weakest.lifetime
+					var lifeage:float = m.current_lifetime / m.lifetime
+					if lifeage > weakest_lifeage:
+						weakest = m
+				# erase the weakest
+				if weakest.action != null:
+					weakest.action.deactivate()
+				mutations.erase(weakest)
+				weakest.queue_free()
 		
 		
 		mutations_container.add_child(mute)
@@ -266,25 +291,25 @@ func finish_fight():
 		
 	# increase our size based on the amount of horrors killed
 	var size_inc:float = 0.0
+	var raw_size_inc:float = 0.0
 	for horror in killed_targets:
 		# size needs to be relative to our current size, so that small creatures don't buff us up as much
 		var size_diff:float = horror.size / self.size
 		size_inc += (horror.size * size_diff) * 0.1
+		raw_size_inc = horror.size * 0.1
 	print("Size UP! %s" % size_inc)
 		
 	self.size += size_inc
 	# if a size increase, update us
 	if size_inc > 0.0:
 		change_collider_size()
-
-	update_traits()
 	
 	
 	# reset our base attack!
 	base_attack.reset_cooldown()
 	
 	# update progression!
-	Globals.progress(size_inc * 2.0)
+	Globals.progress(raw_size_inc * 12.0)
 	
 	# any mutations that are degraded, capture them, yeet them and display a notification
 	var removed_mutations:Dictionary = {}
@@ -301,6 +326,7 @@ func finish_fight():
 	for mute_key in mutations_collection.keys():
 		var found:bool = false
 		for m in mutations:
+			if !is_instance_valid(m): continue
 			if m.readable == mute_key:
 				found = true
 				continue
@@ -343,7 +369,10 @@ func finish_fight():
 	
 	yield(get_tree(), "idle_frame")
 	
-	emit_signal("mutations_changed", mutations_container.get_children())
+	update_traits()
+	emit_signal("mutations_changed", self.mutations)
+	Tools.print_node_names(self.mutations)
+	emit_signal("fight_range_detected", false)
 		
 	Globals.end_fight()
 		
@@ -437,6 +466,26 @@ func get_can_move():
 func set_fight_targets(value:Array):
 	fight_targets = value
 	Globals.start_fight()
+	
+func get_fight_targets():
+	# DO NOT INTERFACE WITH ROTTING HORRORS
+	var results:Array = []
+	for target in fight_targets:
+		if !is_instance_valid(target): continue
+		if target.is_rotting: continue
+		results.append(target)
+		
+	return results
+	
+func get_nearby_horrors():
+	# DO NOT INTERFACE WITH ROTTING HORRORS
+	var results:Array = []
+	for target in nearby_horrors:
+		if !is_instance_valid(target): continue
+		if target.is_rotting: continue
+		results.append(target)
+		
+	return results
 
 # [Override]
 func set_size(value:float):

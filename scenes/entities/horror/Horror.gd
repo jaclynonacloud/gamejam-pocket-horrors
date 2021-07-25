@@ -8,6 +8,7 @@ const NAVIGATION_STUCK_MARGIN:float = 0.05
 
 export var key:String = "" setget , get_key
 export var readable:String = ""
+export var move_range:float = 5.0
 export var navigation_path:NodePath
 export var navigation_point_margin:float = 1.0 setget , get_navigation_point_margin # how close before the point is considered reached
 export var stuck_check_interval:float = NAVIGATION_STUCK_CHECK_INTERVAL
@@ -22,10 +23,13 @@ export var fight_distance:float = 20.0 setget , get_fight_distance # how close t
 export var attack_interval:float = 1.0 # determines how often a horror will look to attack
 
 onready var navigation:Navigation = get_node_or_null(navigation_path)
+onready var fight_area:Area = $Meshes/FightArea
 onready var ambience_audio:AudioStreamPlayer3D = $AmbienceAudio
 onready var damaged_audio:AudioStreamPlayer3D = $DamagedAudio
+onready var death_audio:AudioStreamPlayer3D = $DamagedAudio
 
 var navigation_points:PoolVector3Array = []
+var is_rotting:bool = false # mark as true when rotting so that we don't try to interact with something that is DEAD
 # stuck check
 var navigation_stuck_duration:float = 0.0
 var last_position:Vector3 = Vector3.ZERO
@@ -44,7 +48,11 @@ var is_fighting:bool = false setget , get_is_fighting
 var fight_target:Spatial = null setget set_fight_target
 var fight_position:Vector3 = Vector3.ZERO
 var fighting_data:Array = [] # generate this data whenever a fight target is engaged
-var attack_timer:Timer = Timer.new() # determines how often a horror will check to do an attack
+var current_attack_interval:float = -1.0
+
+#func _unhandled_key_input(event):
+#	if event.pressed && event.scancode == KEY_J:
+#		damaged_audio.play()
 
 func _exit_tree():
 	# let fight target know we are DEAD
@@ -59,15 +67,18 @@ func _update_behaviour():
 # Called by the attack timer.
 func _do_next_attack():
 	var atks:Dictionary = self.attacks
+	print("Attack")
+	print(atks)
 	# read our attacks and find one that is not currently cooling down
 	var attack_keys:Array = atks.keys()
 	attack_keys.shuffle()
 	for key in attack_keys:
 		var attack = atks[key]
+		print("cooldown: %s" % attack.current_cooldown)
 		if attack.current_cooldown >= 0.0: continue
 		# if we got here, we can use this attack!
 		attack(attack, Globals.player)
-	pass
+		return
 	
 # [Override]
 func attack(attack, target:Spatial):
@@ -75,31 +86,43 @@ func attack(attack, target:Spatial):
 	target.take_damage(attack, self)
 	attack.current_cooldown = 0.0
 	
+	if attack.attack_billboard_key != "":
+		# hit them with a billboard!
+		Globals.billboards.use(attack.attack_billboard_key, Globals.player.billboard_origin.global_transform.origin)
 	
-## [Override]
-#func take_damage(attack, caller:Spatial):
-#	if !.take_damage(attack, caller):
-#		print("We dead do something!")
-#	else:
-#		if damaged_audio != null:
-#			print("Damage me bro!")
-#			damaged_audio.play()
+func _body_entered(body:Node):
+	if body.is_in_group("player"):
+		if body.trigger_fight(self):
+			Globals.start_fight()
+			fight(body, true)
+	
+# [Override]
+func call_death():
+	print("We dead do something!")
+	if death_audio != null:
+		death_audio.play()
+# [Override]
+func call_damage():
+	if damaged_audio != null:
+		damaged_audio.play()
 	
 
 # [Override]
 func ready():
 	add_child(behaviour_timer)
-	add_child(attack_timer)
-	attack_timer.wait_time = attack_interval * self.size
-	attack_timer.one_shot = false
 	
 	behaviour_timer.connect("timeout", self, "_update_behaviour")
-	attack_timer.connect("timeout", self, "_do_next_attack")
+	
+	self.size = size
 	
 	# scale the horror only once
 	meshes_container.scale = desired_scale
 	
+	
 	yield(get_tree(), "idle_frame")
+	
+	fight_area.connect("body_entered", self, "_body_entered")
+	
 	setup()
 
 # [Override]
@@ -123,6 +146,13 @@ func process(delta:float):
 		for attack in self.attacks.values():
 			if attack.update_cooldown(delta):
 				attack.reset_cooldown()
+				
+		# check our attack interval
+		if current_attack_interval >= 0.0:
+			current_attack_interval += delta
+			if current_attack_interval > (attack_interval * self.size):
+				_do_next_attack()
+				current_attack_interval = 0.0
 		
 # [Override]
 func physics_process(delta:float):
@@ -152,9 +182,6 @@ func setup(_size:float=1.0):
 	# find navigation
 	if navigation == null:
 		navigation = Globals.navigation
-		
-	# start the next behaviour
-	next_behaviour()
 	
 	last_position = translation
 	change_collider_size()
@@ -162,6 +189,9 @@ func setup(_size:float=1.0):
 	yield(get_tree(), "idle_frame")
 	# setup health
 	heal_full()
+	
+	# start the next behaviour
+	next_behaviour()
 	
 # Rescales the horror.
 func rescale():
@@ -176,11 +206,10 @@ func next_behaviour():
 	elif self.is_fighting: return
 	# picks a new location to travel to
 	randomize()
-	var offset_range:float = 5.0
 	var offset_position:Vector3 = Vector3(
-		rand_range(-offset_range, offset_range),
+		rand_range(-move_range, move_range),
 		0,
-		rand_range(-offset_range, offset_range)
+		rand_range(-move_range, move_range)
 	)
 	
 	# navigate to the location
@@ -247,6 +276,7 @@ func fight(target:Spatial, force_fight:bool=false) -> bool:
 		navigation_points = []
 		navigation_complete()
 		self.fight_target = target
+		current_attack_interval = 0.0
 		velocity = Vector3.ZERO
 		return true
 		
@@ -256,6 +286,7 @@ func fight(target:Spatial, force_fight:bool=false) -> bool:
 		fight_position = target.global_transform.origin.linear_interpolate(global_transform.origin, 0.5)
 		stop_chasing()
 		navigate(fight_position)
+		current_attack_interval = 0.0
 		return true
 	return false
 	
@@ -268,16 +299,22 @@ func demutate():
 	var results:Array = []
 	# go through the list of mutations, and pass on any that are picked up
 	var chance:float = rand_range(0.0, 1.0)
-	for mut in mutes:
-		if mut.chance > chance:
-			results.append(mut)
+	for mute in mutes:
+		if !is_instance_valid(mute): continue
+		if mute.chance > chance:
+			results.append(mute)
 			
 	return results
 	
 # Plays the rotting animation
 func rot():
+	is_rotting = true
 	# remove the debug path
 	Globals.debug.remove_path(str(get_instance_id()))
+	
+	# wait until damage sound completed
+	damaged_audio.play()
+	yield(damaged_audio, "finished")
 	queue_free()
 	
 # Checks if our horror is currently stuck with their navigation.
@@ -361,14 +398,14 @@ func get_key():
 # [Override]
 func get_speed():
 	if self.is_chasing: return chase_speed * get_size_multiplier()
-	return move_speed * get_size_multiplier()
+	return move_speed * get_size_multiplier() + 10.0 
 	
 # [Override]
 func get_attacks():
 	var results:Dictionary = .get_attacks()
 	for mutation in mutations:
+		if !is_instance_valid(mutation): continue
 		results[mutation.attack_key] = mutation
-#		results[mutation.attack_key] = {  "power": mutation.attack_power, "cooldown": mutation.attack_cooldown, "type": mutation.get_mutation_readable() }
 	return results
 	
 # [Override]
@@ -381,15 +418,15 @@ func set_size(value:float):
 	var min_db:float = -11.0
 	
 	if ambience_audio != null:
-		ambience_audio.unit_size = size_ratio * 6.0
-		ambience_audio.unit_db = (max_db - min_db) * size_ratio + min_db
+		ambience_audio.unit_size = size_ratio * 15.0
+		ambience_audio.unit_db = (max_db - min_db) * (size_ratio * 1.3) + min_db
 		
 	# pitching
 	var min_pitch:float = 0.8
 	var max_pitch:float = 3.0
 	
 	if damaged_audio != null:
-		var pitch:float = (1.0 - (min_pitch / max_pitch)) * size_ratio + min_pitch
+		var pitch:float = (min_pitch / max_pitch) * (1.0 - size_ratio) + min_pitch
 		damaged_audio.pitch_scale = pitch
 
 func get_level():
@@ -417,10 +454,8 @@ func set_fight_target(value:Spatial):
 	
 	# turn our fight timer on/off
 	if fight_target == last_target: return
-	if fight_target != null:
-		attack_timer.start()
-	else:
-		attack_timer.stop()
+	if fight_target == null:
+		current_attack_interval = -1.0
 
 func get_navigation_point_margin():
 	return navigation_point_margin
