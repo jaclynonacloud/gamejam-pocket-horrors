@@ -15,6 +15,9 @@ var level:int = 0 setget set_level
 var current_health:float = 0.0 setget set_current_health
 var max_health:float = 1.0 setget set_max_health
 
+func _process(delta:float):
+	update_health()
+
 
 # Updates health values.
 func update_health():

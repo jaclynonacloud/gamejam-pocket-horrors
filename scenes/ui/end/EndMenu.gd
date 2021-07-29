@@ -7,8 +7,12 @@ onready var lose_image:Control = get_node(lose_image_path)
 var is_winning:bool = true setget set_is_winning
 
 
+func _ready():
+	self.is_winning = Globals.game_state_win
+
+
 func _play_again_pressed():
-	Globals.main.play_game()
+	Globals.play_game()
 	
 	
 func _quit_pressed():

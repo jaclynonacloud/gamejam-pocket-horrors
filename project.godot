@@ -20,8 +20,8 @@ _global_script_class_icons={
 
 [application]
 
-config/name="20210716_callum_upton_horror"
-run/main_scene="res://scenes/Main.tscn"
+config/name="Pocket Horrors v1.0.2"
+run/main_scene="res://scenes/Game.tscn"
 config/icon="res://icon.png"
 
 [autoload]
@@ -95,6 +95,7 @@ action_fight={
 3d_physics/layer_2="horrors"
 3d_physics/layer_3="health"
 3d_physics/layer_4="smoll_things"
+3d_physics/layer_5="mutation_pickup"
 
 [locale]
 

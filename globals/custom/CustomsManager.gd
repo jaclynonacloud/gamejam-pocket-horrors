@@ -16,6 +16,12 @@ export var horrors:Dictionary = {
 	"HORROR_EYECU": Reference
 }
 
+export var mutations:Dictionary = {
+	"MUTATION_EYE": Reference,
+	"MUTATION_WINGS": Reference,
+	"MUTATION_GORE": Reference
+}
+
 # Attempts to find a token replacement.
 func find_token_replacement(token:String):
 	match token:
@@ -24,3 +30,9 @@ func find_token_replacement(token:String):
 		"fail_colour":
 			return "#%s" % fail_colour.to_html()
 	return ""
+
+func _ready():
+	for key in mutations.keys():
+		var ref = mutations[key]
+		if ref != null:
+			mutations[key] = ref.instance()

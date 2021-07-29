@@ -1,109 +1,110 @@
-extends "res://scenes/entities/AbstractEntity.gd"
+extends KinematicBody
 
 signal mutations_changed(mutations)
-signal nearby_horrors_changed(horrors)
-signal fight_range_detected(state)
+signal fight_range_detected()
+signal size_changed(size, max_size)
 
-const CHECK_FOR_SAFE_POSITION_INTERVAL:float = 2.0
+signal fight_updated(fight_targets)
+signal fight_ended()
+signal health_changed(health, max_health)
+signal killed()
 
-export var base_stats:Resource
+const MAX_SIZE:float = 100.0
+const MAX_VISUAL_SIZE:float = 3.0
+
+# lights stuff
+export var light_path:NodePath
+onready var light:Light = get_node(light_path)
+
+# traits stuff
+export var traits_container_path:NodePath
+onready var traits_container:Node = get_node(traits_container_path)
+
+# billboard stuff
+export var billboard_origin_path:NodePath
+onready var billboard_origin:Spatial = get_node(billboard_origin_path)
+
+# audio stuff
+export var damage_audio_cooldown:float = 1.0
+onready var damage_audio:AudioStreamPlayer3D = $DamageAudio
+var current_damage_audio_cooldown:float = -1.0
+
+# sizing stuff
+export var visuals_container_path:NodePath
+onready var visuals_container:Spatial = get_node(visuals_container_path)
+var desired_size:float = 1.0
+
+# movement stuff
+export var move_speed:float = 5.0
+export var max_move_speed_mult:float = 2.0
+export var run_mult:float = 1.5
+export (float, 0.0, 1.0, 0.01) var move_slide:float = 0.35
+var desired_velocity:Vector3 = Vector3.ZERO
+var velocity:Vector3 = Vector3.ZERO
+var gravity:float = 2.0
+var can_move:bool = true setget , get_can_move
+var can_run:bool = true setget , get_can_run
+var speed:float = move_speed setget , get_speed
+export (float, 1.0, 100.0, 1.0) var size:float = 1.0 setget set_size, get_size
+
+# actions stuff
+export var pickup_area_path:NodePath
+onready var pickup_area:Area = get_node(pickup_area_path)
+var actions:Dictionary = {} setget , get_actions
+var nearby_health:Spatial = null
+
+# fight stuff
+export var max_opponents:int = 3
+var fight_targets:Array = [] setget , get_fight_targets
+var attacks:Dictionary = {} setget , get_attacks
+var killed_targets:Array = []
+var is_in_fight:bool = false setget , get_is_in_fight
+onready var elite_killed_audio:AudioStreamPlayer3D = $EliteKilledAudio
+
+# health stuff
+var health:float = 0.0 setget set_health
+var max_health:float = 0.0 setget , get_max_health
+var health_bonus:float = 0.0
+
+# pickup stuff
+var nearby_pickups:Array = [] setget , get_nearby_pickups
+var nearby_pickup:Spatial = null setget , get_nearby_pickup
+
+# mutations stuff
+export var mutations_container_path:NodePath
 export var max_mutations:int = 10
-export var fight_range:float = 10.0 setget , get_fight_range
-
-onready var traits_container:Node = $CollisionShape/Meshes/Sprite3D/TraitsContainer
-onready var horror_area:Area = $CollisionShape/Meshes/HorrorArea
-onready var health_area:Area = $CollisionShape/Meshes/HealthArea
-onready var camera_target:Spatial = $CollisionShape/Meshes/CameraTarget
-onready var light:SpotLight = $Light
-onready var damage_audio:AudioStreamPlayer = $DamageAudio
-
-var stats:Dictionary = {} setget , get_stats
+onready var mutations_container:Spatial = get_node(mutations_container_path)
+var mutations:Array = [] setget , get_mutations
+export var horror_area_path:NodePath
+onready var horror_area:Area = get_node(horror_area_path)
 var nearby_horrors:Array = [] setget , get_nearby_horrors
 
-# fighting stuffs
-var fight_targets:Array = [] setget set_fight_targets, get_fight_targets
-var attacking_targets:Array = []
-var killed_targets:Array = []
-var is_dead:bool = false
-
-var nearby_health:Node = null
-
-var can_move:bool = true setget , get_can_move
-var is_in_fight_range:bool = false
-
-var last_safe_position:Vector3 = Vector3.ZERO
-var last_safe_position_interval:float = 0.0
-
-func _init():
+func _ready():
 	Globals.player = self
 	
-func _nearby_horror_updated(body:Node, entered:bool):
-	# if we are currently fighting, ignore any horror requests
-	if fight_targets.size() > 0: return
-	
-	if entered:
-		nearby_horrors.append(body)
-	else:
-		nearby_horrors.erase(body)
-		
-	emit_signal("nearby_horrors_changed", self.nearby_horrors)
-	emit_signal("fight_range_detected", !self.nearby_horrors.empty())
-	
-func _health_area_updated(area:Node, entered:bool):
-	if entered:
-		nearby_health = area
-	else:
-		nearby_health = null
-	Globals.emit_signal("health_available", entered, nearby_health)
-	
-	
-#func _unhandled_key_input(event):
-#	if event.pressed && event.scancode == KEY_Z:
-#		global_transform.origin = Vector3.ZERO
-#	if event.pressed && event.scancode == KEY_L:
-#		print("Yes")
-#		self.size += 1.0
-#		change_collider_size()
-#		Globals.progress(10.0)
-	
-# [Overide]
-func ready():
-	.ready()
-	
-	meshes_container = get_node("CollisionShape/Meshes")
-	collision_shape_origin = get_node("CollisionShape/Meshes/CollisionOrigin")
-	sprite_container = get_node("CollisionShape/Meshes/Sprite3D")
-	
-	change_collider_size()
-	
-	emit_signal("mutations_changed", mutations)
+	heal(1000000.0)
 	
 	yield(get_tree(), "idle_frame")
+	
+	# set our initials
+	self.size = size
+	self.mutations = mutations
+	
+	# activate current mutations actions
+	for mute in self.mutations:
+		if mute.action != null:
+			mute.action.activate(self)
 	
 	update_traits()
+	emit_signal("mutations_changed", self.mutations)
 	
-	# fire our current health
-	heal_full()
-	
-	# fire our current mutations
-	emit_signal("mutations_changed", mutations)
-	
-	horror_area.connect("body_entered", self, "_nearby_horror_updated", [true])
-	horror_area.connect("body_exited", self, "_nearby_horror_updated", [false])
-	
-	health_area.connect("area_entered", self, "_health_area_updated", [true])
-	health_area.connect("area_exited", self, "_health_area_updated", [false])
-	
-	yield(get_tree(), "idle_frame")
-	yield(get_tree(), "idle_frame")
-	yield(get_tree(), "idle_frame")
-	yield(get_tree(), "idle_frame")
-	yield(get_tree(), "idle_frame")
-	# initial pulse of horror area so we can capture any nearby horrors
-	pulse_horror_area()
-	
-# [Override]
-func process(delta:float):
+	# add connections
+	horror_area.connect("body_entered", self, "_horror_body_updated", [true])
+	horror_area.connect("body_exited", self, "_horror_body_updated", [false])
+	pickup_area.connect("area_entered", self, "_pickup_area_updated", [true])
+	pickup_area.connect("area_exited", self, "_pickup_area_updated", [false])
+
+func _process(delta:float):
 	# if we are not on the game layer, kill our velocity
 	if Inputs.active_layer != Inputs.INPUT_LAYER_GAME:
 		desired_velocity = Vector3.ZERO
@@ -115,285 +116,274 @@ func process(delta:float):
 		else:
 			desired_velocity = Vector3.ZERO
 			
-	# update our sprite
-	if sprite_container != null:
-		var cam_transform = Globals.game_camera.rotation_degrees
-		sprite_container.rotation_degrees.x = cam_transform.x
+	# update our size!
+	visuals_container.scale = visuals_container.scale.linear_interpolate(Vector3.ONE * desired_size, 0.3)
+	
+	
+	# handle our cooldowns!
+	if current_damage_audio_cooldown >= 0.0:
+		current_damage_audio_cooldown += delta
+		if current_damage_audio_cooldown > damage_audio_cooldown:
+			current_damage_audio_cooldown = -1.0
+
+func _physics_process(delta:float):
+	update_velocity(delta)
+	apply_gravity(delta)
+	calculate_movement(delta)
+	
+#func _unhandled_key_input(event):
+#	# send back to center
+#	if event.pressed && event.scancode == KEY_Z:
+#		global_transform.origin = Vector3.ZERO
+#	# size check
+#	if event.pressed && event.scancode == KEY_L:
+#		self.size += (MAX_SIZE * 0.1)
+#		Globals.progress(10.0)
+#	# insta kill
+#	if event.pressed && event.scancode == KEY_K:
+#		for target in self.fight_targets:
+#			target.damage(10000000.0)
+#	# break out of fight
+#	if event.pressed && event.scancode == KEY_J:
+#		flee()
+#	# kill us
+#	if event.pressed && event.scancode == KEY_O:
+#		damage(10000000.0)
 		
-		
-	# update nearby horrors
-	for horror in self.nearby_horrors:
-		# the horrors themselves will decide whether they want to engage
-		horror.update_behaviour(self)
-		
-		
-	# update our scale if we are not close
-	var is_close_to_scale:bool = abs(meshes_container.scale.length() - desired_scale.length()) < 0.02
-	if !is_close_to_scale:
-		meshes_container.scale = meshes_container.scale.linear_interpolate(desired_scale, 0.9 * delta)
-		
-	# update safe position
-	last_safe_position_interval += delta
-	if last_safe_position_interval > CHECK_FOR_SAFE_POSITION_INTERVAL:
-		last_safe_position_interval = 0.0
-		var result:Dictionary = get_world().direct_space_state.intersect_ray(global_transform.origin + Vector3.UP * 3.5, global_transform.origin + Vector3.DOWN * 15.0, [self])
-		if result.get("position"):
-			last_safe_position = result.position
-		
-	
-# Will determine how many times this mutation has been picked up by the Player, so we can amplify the attack.
-func get_mutation_recurrence(mutation) -> int:
-	var recurrence:int = 0
-	if mutation.get("key") == null: return 1
-	for m in mutations_container.get_children():
-		if m.key == mutation.key:
-			recurrence += 1
-	return recurrence
-	
-# [Override]
-func alert_of_death(target:Spatial):
-	if self.nearby_horrors.has(target):
-		nearby_horrors.erase(target)
-	if fight_targets.has(target):
-		fight_targets.erase(target)
-		# restart fight
-		if fight_targets.size() > 0:
-			trigger_fight()
-	
-# [Override]
-func attack(attack, target:Spatial):
-	print("Attacking with: %s" % attack.attack_key)
-	if attack != null:
-#		var strength:float = attack.power + self.base_attack_power
-#		# lessen the power by the amount of engaged horrors
-#		strength = strength * max(0.3, strength / fight_targets.size())
-#		# attack must do AT LEAST one damage
-#		strength = max(1.0, strength)
-#		print("Strength: %s" % strength)
-#		attack.current_cooldown = 0.0
-		
-		for horror in fight_targets:
-			if !is_instance_valid(horror): continue
-			if horror == null: continue
-			if horror.is_rotting: continue
-			if !horror.take_damage(attack, self):
-				# add horror to killed targets, so we can do fight finish when done
-				if !killed_targets.has(horror):
-					killed_targets.append(horror)
-			# TODO: determine billboard hit!
-			else:
-				# hit them with a billboard!
-				Globals.billboards.use(attack.attack_billboard_key, horror.billboard_origin.global_transform.origin)
-				
-		# check to see if we finished the fight!
-		var has_targets_left:bool = false
-		for horror in fight_targets:
-			if !killed_targets.has(horror):
-				has_targets_left = true
-				break
-				
-		if !has_targets_left:
-			finish_fight()
-			
-# Damages the entity!
-func take_damage(attack, caller:Spatial):
-	print("I got in here?")
-	if is_dead: return
-	
-	print("Im taking damage!")
-	print(attack)
-	var is_killed = !.take_damage(attack, caller)
-	
-	damage_audio.play()
-	
-	if is_killed:
-		is_dead = true
-		yield(damage_audio, "finished")
-		print("End Game Slate!")
-		Globals.main.end_menu(false)
-	
-	# update our ui
-	Globals.game_ui.fight.update_player_data()
-	
-# Respawns us at last safe position.
-func respawn():
-	global_transform.origin = last_safe_position
-	velocity = Vector3.ZERO
-	
-# This triggers all nearby horrors to FIGHT US!
-func trigger_fight(attack_target:Spatial=null):
-	if attack_target != null:
-		attacking_targets.append(attack_target)
-		self.fight_targets = attacking_targets
+func _horror_body_updated(body:Node, entered:bool):
+	if entered:
+		nearby_horrors.append(body)
 	else:
-		for horror in self.nearby_horrors:
-			horror.fight(self, true)
-		self.fight_targets = self.nearby_horrors
-	
-	return !self.fight_targets.empty()
-			
-func finish_fight():
-	# go through all of our killed targets, and absorb them
-	var all_mutations:Array = []
-	for horror in killed_targets:
-		var mutes = horror.demutate()
-		all_mutations.append_array(mutes)
+		nearby_horrors.erase(body)
 		
-		
-	var current_mutations:Array = mutations_container.get_children()
-	# add all of the new mutations to our player
-	var mutations_collection:Dictionary = {}
-	for mute in all_mutations:
-		mute.get_parent().remove_child(mute)
-		mute.reset()
-		
-		# degrade lifetime of our current mutations
-		for m in current_mutations:
-			m.degrade()
-		# if our mutations container already holds a mutation of this type, renew it
-		for m in current_mutations:
-			# reset our cooldowns
-			mute.reset_cooldown()
-			# renew our lifetime counter -- if recollected
-			if mute.key == m.key:
-				m.renew()
-		
-		
-		# if we have too many mutations, find the weakest ones and YEET them
-		print("size vs mutes: %s - %s" % [mutations.size(), max_mutations])
-		if mutations.size() >= max_mutations:
-			var weakest:Node = mutations.front()
-			if is_instance_valid(weakest):
-				# find our weakest mutation and toss it
-				for m in mutations:
-					if !is_instance_valid(m): continue
-					var weakest_lifeage:float = weakest.current_lifetime / weakest.lifetime
-					var lifeage:float = m.current_lifetime / m.lifetime
-					if lifeage > weakest_lifeage:
-						weakest = m
-				# erase the weakest
-				if weakest.action != null:
-					weakest.action.deactivate()
-				mutations.erase(weakest)
-				weakest.queue_free()
-		
-		
-		mutations_container.add_child(mute)
-		mutations.append(mute)
-		if mute.action != null:
-			mute.action.activate(self)
-		
-		# count how many times we receive this mutation so we can send notifications
-		if mutations_collection.get(mute.readable, null) == null:
-			mutations_collection[mute.readable] = 1
+# we are also processing pickups from here now
+func _pickup_area_updated(area:Node, entered:bool):
+	# this is a mutation pickup
+	if area.get_parent().is_in_group("pickup"):
+		if entered:
+			nearby_pickups.append(area.get_parent())
 		else:
-			mutations_collection[mute.readable] += 1
+			nearby_pickups.erase(area.get_parent())
+		Globals.emit_signal("pickup_available", self.nearby_pickup)
+	# this is health
+	elif area.is_in_group("health"):
+		if entered:
+			nearby_health = area
+		else:
+			nearby_health = null
+		Globals.emit_signal("health_available", entered, nearby_health)
 	
-	# rot all the horrors
-	for horror in killed_targets:
-		horror.rot()
+func _fight_target_killed(horror:Spatial):
+	# disconnect us
+	horror.disconnect("killed", self, "_fight_target_killed")
+	
+	horror.change_state(horror.STATE_DEATH)
+	var targets:Array = self.fight_targets
+	fight_targets.erase(horror)
+	killed_targets.append(horror)
+	
+	emit_signal("fight_updated", fight_targets)
+	
+	# if all of our targets have been killed, finish the fight!
+	if fight_targets.size() <= 0:
+		finish_fight()
+
+
+# Updates the entity velocity based on the desired velocity.
+func update_velocity(delta:float):
+	velocity = velocity.linear_interpolate(desired_velocity, move_slide)
+	
+# Applies gravity to the entity.
+func apply_gravity(delta:float):
+	velocity += Vector3.DOWN * gravity
+
+# Moves our player.
+func calculate_movement(delta:float):
+	# move our player based on velocity
+	move_and_slide(velocity, Vector3.UP, true, 4, 0.9)
+	
+	
+# -- FIGHT STUFF -- #
+# Let's a horror join the fight!  Will return false if they didn't join for whatever reason.
+func join_fight(horror:Spatial) -> bool:
+	if !is_instance_valid(horror): return false
+	if !fight_targets.has(horror):
+		# if we are already at max opponents, let horror know they cannot join
+		if fight_targets.size() >= max_opponents:
+			print("Too busy!")
+			return false
 		
-	# increase our size based on the amount of horrors killed
-	var size_inc:float = 0.0
-	var raw_size_inc:float = 0.0
-	for horror in killed_targets:
-		# size needs to be relative to our current size, so that small creatures don't buff us up as much
-		var size_diff:float = horror.size / self.size
-		size_inc += (horror.size * size_diff) * 0.1
-		raw_size_inc = horror.size * 0.1
-	print("Size UP! %s" % size_inc)
+		fight_targets.append(horror)
 		
-	self.size += size_inc
-	# if a size increase, update us
-	if size_inc > 0.0:
-		change_collider_size()
-	
-	
-	# reset our base attack!
-	base_attack.reset_cooldown()
-	
-	# update progression!
-	Globals.progress(raw_size_inc * 12.0)
-	
-	# any mutations that are degraded, capture them, yeet them and display a notification
-	var removed_mutations:Dictionary = {}
-	for m in mutations_container.get_children():
-		if m.is_degraded:
-			if removed_mutations.has(m.readable):
-				removed_mutations[m.readable] += 1
-			else:
-				removed_mutations[m.readable] = 1
-			m.queue_free()
-			mutations.erase(m)
+		emit_signal("fight_updated", fight_targets)
 		
-	# tailor our mutations conllection to only include those mutations that have been successfully kept in the mutations
-	for mute_key in mutations_collection.keys():
-		var found:bool = false
-		for m in mutations:
-			if !is_instance_valid(m): continue
-			if m.readable == mute_key:
-				found = true
-				continue
-				
-		if !found:
-			# if we didn't find the mutation, throw it away
-			mutations_collection.erase(mute_key)
-		
-	# queue our messages!
-	var notif_ui:Control = Globals.game_ui.notifications
-	notif_ui.queue_notification("%s %s %s" % [
-			Globals.translate("MESSAGE_SIZE_INCREASED"),
-			ceil(size_inc * 10.0),
-			Globals.translate("SIZE_METRIC")
-		])
-	# mutated
-	for mute_key in mutations_collection.keys():
-		var amount:int = mutations_collection[mute_key]
-		notif_ui.queue_notification("%s %s%s" % [
-				Globals.translate("MESSAGE_MUTATION_DETECTED"),
-				Globals.translate(mute_key),
-				"" if amount == 1 else " x%s" % amount
-			])
-	# lost
-	for mute_key in removed_mutations.keys():
-		var amount:int = removed_mutations[mute_key]
-		notif_ui.queue_notification("%s %s%s" % [
-				Globals.translate("MESSAGE_MUTATION_LOST"),
-				Globals.translate(mute_key),
-				"" if amount == 1 else " x%s" % amount
-			])
-		
-	notif_ui.next_notification()
+		# add listeners for death
+		if !horror.is_connected("killed", self, "_fight_target_killed"):
+			horror.connect("killed", self, "_fight_target_killed", [horror])
+			
+		# if this was our first join tell the game
+		if self.fight_targets.size() == 1:
+			print("Fight Starting!!")
+			Globals.emit_signal("fight_started")
+		return true
+	return false
 	
+# Let's end this!
+func finish_fight():
+	# steal some new mutations
+	var available_mutations:Array = collect_mutations()
+	# get our degraded mutations
+	degrade_mutations()
+	
+	# add in our new mutations, and be ready to bump out old ones
+	var added_mutations:Array = []
+	var lost_mutations:Array = []
+	for mute in available_mutations:
+		# if we have room, just add!
+		if self.mutations.size() >= max_mutations:
+			var weakest:Spatial = find_weakest_mutation()
+			# if there is no weakest (??) bounce out of here and ignore
+			if weakest == null: continue
+			# otherwise, swap us out
+			mutations.erase(weakest) # toss old
+			lost_mutations.append(weakest)
+			
+		# add the new mutation
+		mutations.append(mute)
+		added_mutations.append(mute)
+		# renew the mutations
+		renew_mutations_of_key(mute.key)
+		
+	# "borrow" the mutations from their parents, before we lose them forever!
+	for mute in added_mutations:
+		var parent:Spatial = mute.get_parent()
+		if parent != null:
+			parent.remove_child(mute)
+		mutations_container.add_child(mute)
+		
+	# destroy our old, useless mutations
+	for mute in lost_mutations:
+		mute.queue_free()
+			
+	# tell the world our mutations changed
+	if added_mutations.size() > 0 || lost_mutations.size() > 0:
+		emit_signal("mouse_exited", self.mutations)
+		
+	# get our new size!
+	var new_size:float = self.size + get_kill_size_bonus()
+	self.size = new_size
+	health_bonus += new_size * 15.0
 	
 	# heal by size of horrors defeated
-	var heal_amount:float = size_inc * 15.0
+	var heal_amount:float = new_size * 15.0
 	heal(heal_amount)
 	
-	# if we don't have a tree assume we are dead ):<
-	if !is_instance_valid(get_tree()):
-		Globals.main.end_menu(false)
+	# update progress
+	Globals.progress(new_size)
+	
+	# determine if we killed an elite!
+	for horror in killed_targets:
+		if horror.size >= 98.9:
+			if Globals.killed_elite(horror.readable):
+				elite_killed_audio.play()
+		
+	# tell notifications what happened!
+	notify_fight_results(new_size, added_mutations, lost_mutations)
+	
+	# activate new mutations actions
+	for mute in added_mutations:
+		if mute.action != null:
+			mute.action.activate(self)
+	# deactivate old mutations actions
+	for mute in lost_mutations:
+		if mute.action != null:
+			mute.action.deactivate()
 	
 	yield(get_tree(), "idle_frame")
 	
+	# update our visual traits
 	update_traits()
+	
+	emit_signal("fight_ended")
+	Globals.emit_signal("fight_ended")
+	
 	emit_signal("mutations_changed", self.mutations)
-	Tools.print_node_names(self.mutations)
-	emit_signal("fight_range_detected", false)
-		
-	Globals.end_fight()
-		
-	fight_targets = []
+	
+	# clear vars
 	killed_targets = []
-	attacking_targets = []
+
+# Heals us!
+func heal(amount:float):
+	self.health += amount
 	
-	pulse_horror_area()
+# Damages us!
+func damage(amount:float):
+	self.health -= amount
 	
+	# play audio if it is not cooling down
+	if current_damage_audio_cooldown == -1.0:
+		damage_audio.play()
+		current_damage_audio_cooldown = 0.0
+		
+	# are we dead?
+	if health <= 0.0:
+		Globals.end_game(false)
+	
+# Attack all fight targets!
+func attack(attack:Node):
+	var size_mult:float = (self.size / MAX_SIZE) * 120.0
+	for target in self.fight_targets:
+		var hit_power:float = attack.power * max(1.0, get_mutation_recurrence(attack.attack_key)) * size_mult
+		target.damage(hit_power)
+		# hit them with a billboard!
+		Globals.billboards.use(attack.attack_billboard_key, target.billboard_origin.global_transform.origin)
+		
+	# if this attack has a regen, give us some health!
+	if attack.regen_perc > 0.0:
+		var amount:float = ((attack.regen_perc * get_mutation_recurrence(attack.attack_key)) * size_mult) * 500.0
+		heal(amount)
+		
+# Because we are a coward!
+func flee():
+	Inputs.remove_layer(Inputs.INPUT_LAYER_FIGHT)
+	for horror in self.fight_targets:
+		horror.change_state(horror.STATE_IDLE)
+		horror.current_rejected_fight_cooldown = 0.0
+	blow_away(2, false)
+	fight_targets = []
+	Globals.emit_signal("fight_ended")
+		
+# Blows away nearby horrors!
+func blow_away(power:float, show_notif:bool=true):
+	var force:float = power * 800.0
+	for horror in self.nearby_horrors:
+		horror.blow_away(global_transform.origin, force)
+		
+	if self.nearby_horrors.size() > 0:
+		if show_notif:
+			Globals.game_ui.notifications.queue_notification("WING_ACTION_NOTIFICATION", true)
+		
 # Tries to do an action!
 func do_action(action_name:String):
-	
 	# handle global actions first
 	match action_name:
+		"internal_pickup_mutation":
+			if self.nearby_pickup != null:
+				var pickup = self.nearby_pickup
+				# generate the pickup
+				var pickup_key:String = pickup.key
+				var inst:Node = Globals.customs.mutations.get(pickup_key, null)
+				if inst != null:
+					mutations_container.add_child(inst.duplicate())
+					self.mutations = self.mutations
+					# remove the pickup
+					if pickup.is_in_group("initial_pickup"):
+						Globals.picked_up_first_mutation(pickup)
+					pickup.queue_free()
+					
+					update_traits()
+					emit_signal("mutations_changed", self.mutations)
+					nearby_pickups.erase(pickup)
 		"internal_pickup_health":
 			if nearby_health != null:
 				heal(self.max_health * nearby_health.health_percent) # heal by gem percent
@@ -407,114 +397,202 @@ func do_action(action_name:String):
 	if action != null:
 		action.use()
 	
-# [Override]
-func calculate_movement(delta:float):
-	# move our player based on velocity
-	callv("move_and_slide", [velocity, Vector3.UP, true, 4, 0.9])
-	
-# Pulses the horror area.
-func pulse_horror_area():
-	nearby_horrors = []
-	horror_area.set_collision_layer_bit(1, false)
-	var col:CollisionShape = horror_area.get_node("CollisionShape")
-	col.disabled = true
-	yield(get_tree(), "idle_frame")
-	horror_area.set_collision_layer_bit(1, true)
-	col.disabled = false
-	
+# -- OTHER -- #
 # Updates our traits!
 func update_traits():
 	# set our bodily traits
 	traits_container.clear_traits()
-	for mute in mutations_container.get_children():
-		if !is_instance_valid(mute): continue
+	for mute in self.mutations:
 		if mute.trait_slot_key != "":
 			traits_container.add_trait(mute.trait_slot_key, 1)
+			
+# Collect mutations from killed targets.
+func collect_mutations():
+	var collection:Array = []
+	for target in killed_targets:
+		for mute in target.mutations:
+			if mute.hidden_mutation: continue
+			var chance:float = rand_range(0.0, 1.0)
+			if chance <= mute.chance:
+				collection.append(mute)
+	return collection
 	
-# Gets the mutation actions.
+# Degrades mutations and returns who didn't make it.
+func degrade_mutations() -> Array:
+	var mutes:Array = []
+	for mute in self.mutations:
+		mute.degrade()
+		if mute.is_degraded:
+			mutes.append(mute)
+	return mutes
+	
+# Gets the recurrence of a mutation by its attack_key
+func get_mutation_recurrence(attack_key:String) -> int:
+	var recurrence:int = 0
+	for mute in self.mutations:
+		if mute.attack_key == attack_key:
+			recurrence += 1
+	return int(min(recurrence, 5.0)) # cap us at 5 for recurrence!
+	
+# Gets the total mutations we have, excluding hidden ones.
+func get_mutations_amount() -> int:
+	var result:int = 0
+	for mute in self.mutations:
+		if mute.hidden_mutation: continue
+		result += 1
+	return result
+	
+# Renew mutations of key.
+func renew_mutations_of_key(mute_key:String):
+	for mute in self.mutations:
+		if mute.key == mute_key:
+			mute.renew()
+	
+# Find weakest mutation.
+func find_weakest_mutation():
+	var weakest:Spatial = null
+	for mute in self.mutations:
+		if mute.hidden_mutation: continue
+		if weakest == null:
+			weakest = mute
+			continue
+		# test against weakest
+		var curr_perc:float = mute.current_lifetime / mute.lifetime
+		var weakest_perc:float = weakest.current_lifetime / weakest.lifetime
+		if curr_perc > weakest_perc:
+			weakest = mute
+			
+	return weakest
+	
+# Announces changes to notifications.
+func notify_fight_results(size_change:float, added_mutations:Array, lost_mutations:Array):
+	var notif_ui:Node = Globals.game_ui.notifications
+	# size change
+	notif_ui.queue_notification("%s %s %s" % [
+			Globals.translate("MESSAGE_SIZE_INCREASED"),
+			ceil(size_change * 10.0),
+			Globals.translate("SIZE_METRIC")
+		])
+	# added
+	var added_group:Dictionary = {}
+	for mute in added_mutations:
+		added_group[mute.readable] = added_group.get(mute.readable, 0) + 1
+	for mute_key in added_group.keys():
+		var amount:int = added_group[mute_key]
+		notif_ui.queue_notification("%s %s%s" % [
+				Globals.translate("MESSAGE_MUTATION_DETECTED"),
+				Globals.translate(mute_key),
+				"" if amount == 1 else " x%s" % amount
+			])
+	# lost
+	var lost_group:Dictionary = {}
+	for mute in lost_mutations:
+		lost_group[mute.readable] = lost_group.get(mute.readable, 0) + 1
+	for mute_key in lost_group.keys():
+		var amount:int = lost_group[mute_key]
+		notif_ui.queue_notification("%s %s%s" % [
+				Globals.translate("MESSAGE_MUTATION_LOST"),
+				Globals.translate(mute_key),
+				"" if amount == 1 else " x%s" % amount
+			])
+			
+	notif_ui.next_notification()
+	
+# Determine new size from slain horrors.
+func get_kill_size_bonus():
+	var result:float = 0.0
+	for horror in killed_targets:
+		result += (horror.size * 2.5) / MAX_SIZE
+	return result
+
+# --------- GETTERS & SETTERS --------- #
+func set_health(value:float):
+	health = clamp(value, 0.0, self.max_health)
+	emit_signal("health_changed", health, self.max_health)
+	
+	if health <= 0.0:
+		emit_signal("killed")
+	
+func get_max_health():
+	return ((self.size / MAX_SIZE) * 100.0) + 150.0 + health_bonus
+	
+func set_size(value:float):
+	size = min(value, MAX_SIZE)
+	desired_size = max(((size / MAX_SIZE) * MAX_VISUAL_SIZE), 1.0)
+	
+	emit_signal("size_changed", size, MAX_SIZE)
+	
+func get_size():
+	return size
+	
+func get_can_move():
+	return self.fight_targets.size() <= 0
+	
+func get_can_run():
+	# TODO: make only butterfly wings can run
+	return can_run
+
+func get_speed():
+	var size_mult:float = (self.size / MAX_SIZE) / max_move_speed_mult
+	var mult:float = 1.0
+	if self.can_run: mult = run_mult + size_mult
+	return move_speed * mult + size_mult
+
+func get_mutations():
+	if mutations_container == null: return []
+	var results:Array = []
+	for mute in mutations_container.get_children():
+		if !is_instance_valid(mute): continue
+		if mute == null: continue
+		results.append(mute)
+	return results
+	
+func get_fight_targets():
+	var results:Array = []
+	for target in fight_targets:
+		if !is_instance_valid(target): continue
+		if target == null: continue
+		results.append(target)
+	return results
+
+func get_attacks():
+	var results:Dictionary = {}
+	for mute in self.mutations:
+		if mute.attack_key != "":
+			results[mute.attack_key] = mute
+	return results
+	
 func get_actions():
 	var results:Dictionary = {}
 	for mute in mutations_container.get_children():
 		if !is_instance_valid(mute): continue
 		if mute.action != null:
 			results[mute.action.action_name] = mute.action
-			
 	return results
 
-# [Override]
-func get_attacks():
-	var results:Dictionary = .get_attacks()
-	for mutation in mutations:
-		if !is_instance_valid(mutation): continue
-		results[mutation.attack_key] = mutation
-#		results[mutation.attack_key] = {  "power": mutation.attack_power, "cooldown": mutation.attack_cooldown, "type": mutation.get_mutation_readable() }
-	return results
+func get_is_in_fight():
+	return fight_targets.size() > 0
 	
-# [Override]
-func get_base_attack_power():
-	var result:float = base_attack_power * self.size
-	for mutation in mutations:
-		if !is_instance_valid(mutation): continue
-		result += (mutation.base_stats.stat_damage * 0.3) * self.size
-	return result
-	
-func get_speed():
-	return move_speed + (10.0 * self.size)
-
-func get_stats():
-	# get base stats
-	var results:Dictionary = Tools.get_stats_from(base_stats)
-	# include all mutations
-	if mutations_container != null:
-		for mutation in mutations:
-			if !is_instance_valid(mutation): continue
-			results = Tools.add_float_dictionaries(results, mutation.stats)
-	return results
-
-func get_can_move():
-	return fight_targets.size() <= 0
-
-func set_fight_targets(value:Array):
-	fight_targets = value
-	Globals.start_fight()
-	
-func get_fight_targets():
-	# DO NOT INTERFACE WITH ROTTING HORRORS
-	var results:Array = []
-	for target in fight_targets:
-		if !is_instance_valid(target): continue
-		if target.is_rotting: continue
-		results.append(target)
-		
-	return results
-	
+# Cleans the horrors out that are bad.
 func get_nearby_horrors():
-	# DO NOT INTERFACE WITH ROTTING HORRORS
-	var results:Array = []
-	for target in nearby_horrors:
-		if !is_instance_valid(target): continue
-		if target.is_rotting: continue
-		results.append(target)
+	var good_horrors:Array = []
+	for horror in nearby_horrors:
+		if !is_instance_valid(horror): continue
+		if horror == null: continue
+		if horror.is_dead: continue
+		good_horrors.append(horror)
+	nearby_horrors = good_horrors
+	return nearby_horrors
+
+ # Cleans the pickups out that are bad.
+func get_nearby_pickups():
+	var good_pickups:Array = []
+	for pickup in nearby_pickups:
+		if !is_instance_valid(pickup): continue
+		if pickup == null: continue
+		nearby_pickups.append(pickup)
+	nearby_pickups = good_pickups
+	return nearby_pickups
 		
-	return results
-
-# [Override]
-func set_size(value:float):
-	size = value
-	var sc:Vector3 = Vector3.ONE * max(0.01, size - 0.5)
-	var mc:Spatial = meshes_container if meshes_container != null else get_node("CollisionShape/Meshes")
-	desired_scale = Vector3.ONE
-	
-	# once things reach size 2.6 up, don't collide with smoll things anymore
-	var smoll_things_bit:int = 3
-	var is_too_beefy:bool = size >= 2.6
-	set_collision_mask_bit(smoll_things_bit, !is_too_beefy)
-	
-	emit_signal("size_changed", size)
-	
-# [Override]
-func get_size_multiplier():
-	return self.size - 0.5
-
-func get_fight_range():
-	return fight_range * get_size_multiplier()
+func get_nearby_pickup():
+	return nearby_pickups.back()

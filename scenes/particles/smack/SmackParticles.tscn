@@ -1,0 +1,46 @@
+[gd_scene load_steps=9 format=2]
+
+[ext_resource path="res://graphics/game/particles/smack.png" type="Texture" id=1]
+
+[sub_resource type="SpatialMaterial" id=1]
+flags_transparent = true
+flags_unshaded = true
+flags_vertex_lighting = true
+flags_do_not_receive_shadows = true
+flags_disable_ambient_light = true
+vertex_color_use_as_albedo = true
+params_billboard_mode = 1
+albedo_texture = ExtResource( 1 )
+
+[sub_resource type="Gradient" id=2]
+colors = PoolColorArray( 0.709804, 0.894118, 0.12549, 1, 0, 0.807843, 0.0901961, 1 )
+
+[sub_resource type="GradientTexture" id=3]
+gradient = SubResource( 2 )
+
+[sub_resource type="Curve" id=4]
+_data = [ Vector2( 0, 0.0545454 ), 0.0, 0.399044, 0, 0, Vector2( 0.882494, 0.354545 ), 0.0, 0.0, 0, 0, Vector2( 1, 0 ), -7.20273, 0.0, 0, 0 ]
+
+[sub_resource type="CurveTexture" id=5]
+curve = SubResource( 4 )
+
+[sub_resource type="ParticlesMaterial" id=6]
+lifetime_randomness = 0.05
+emission_shape = 1
+emission_sphere_radius = 1.0
+gravity = Vector3( 0, 1, 0 )
+initial_velocity = -0.1
+radial_accel = 1.0
+scale = 2.0
+scale_curve = SubResource( 5 )
+color_ramp = SubResource( 3 )
+hue_variation = 0.22
+
+[sub_resource type="QuadMesh" id=7]
+
+[node name="SmackParticles" type="Particles"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.790485, 0 )
+material_override = SubResource( 1 )
+amount = 3
+process_material = SubResource( 6 )
+draw_pass_1 = SubResource( 7 )

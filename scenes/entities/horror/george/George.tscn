@@ -39,21 +39,17 @@ params_billboard_mode = 1
 albedo_texture = ExtResource( 6 )
 
 [node name="George" instance=ExtResource( 1 )]
-move_speed = 6.0
-base_health = 25.0
-size = 3.0
+MAX_VISUAL_SIZE = 5.526
 key = "gore"
 readable = "HORROR_GORE"
-chase_distance = 20.0
-fight_distance = 7.0
-attack_interval = 3.0
+move_speed = 0.15
+chase_distance = 12.0
+fight_distance = 8.0
+attack_interval = 7.0
 
 [node name="CollisionShape" parent="." index="0"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.823783, 0 )
 shape = SubResource( 1 )
-
-[node name="CollisionOrigin" parent="Meshes" index="0"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.824, 0 )
 
 [node name="Sprite3D" type="AnimatedSprite3D" parent="Meshes" index="1"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.214213, 0.0210876, 0 )
@@ -63,7 +59,6 @@ billboard = 1
 shaded = true
 frames = SubResource( 4 )
 animation = "idle"
-frame = 1
 playing = true
 
 [node name="HealthParticles" parent="Meshes/Sprite3D" index="0" instance=ExtResource( 5 )]
@@ -71,11 +66,11 @@ transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.55427, -0.390234 )
 material_override = SubResource( 5 )
 
 [node name="GoreMutation" parent="Mutations" index="0" instance=ExtResource( 3 )]
-attack_key = "ATTACK_GORE"
-attack_cooldown = 3.0
 
 [node name="AmbienceAudio" parent="." index="3"]
 stream = ExtResource( 4 )
 
 [node name="DamagedAudio" parent="." index="4"]
 stream = ExtResource( 7 )
+unit_db = -22.469
+unit_size = 11.6

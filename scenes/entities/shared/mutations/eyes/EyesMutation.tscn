@@ -1,7 +1,6 @@
-[gd_scene load_steps=5 format=2]
+[gd_scene load_steps=4 format=2]
 
 [ext_resource path="res://scenes/entities/shared/mutations/eyes/EyesMutation.gd" type="Script" id=1]
-[ext_resource path="res://custom/resources/stats/StatsResource.tres" type="Resource" id=2]
 [ext_resource path="res://scenes/actions/eye/EyeAction.tscn" type="PackedScene" id=3]
 [ext_resource path="res://sfx/Spooky Juice-20210724T153133Z-001/Spooky Juice/Damage and Hit Noises/Hit Noise 3- Weird.mp3" type="AudioStream" id=4]
 
@@ -11,11 +10,10 @@ key = "mutation_eyes"
 readable = "MUTATION_EYES"
 mutation_type = 4
 lifetime = 4
+power = 80.0
 attack_billboard_key = "ATTACK_EYE"
 trait_slot_key = "eye"
 action_resource = ExtResource( 3 )
-base_stats = ExtResource( 2 )
 attack_key = "ATTACK_EVIL_EYE"
-attack_power = 3.0
-extra_damage = 0.4
+attack_cooldown = 3.0
 audio_hit = ExtResource( 4 )

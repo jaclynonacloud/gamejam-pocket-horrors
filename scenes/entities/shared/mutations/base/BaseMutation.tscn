@@ -1,0 +1,13 @@
+[gd_scene load_steps=2 format=2]
+
+[ext_resource path="res://scenes/entities/shared/mutations/base/BaseMutation.gd" type="Script" id=1]
+
+[node name="BaseMutation" type="Spatial"]
+script = ExtResource( 1 )
+key = "base_mutation"
+readable = "MUTATION_BASE"
+hidden_mutation = true
+power = 60.0
+attack_billboard_key = ""
+attack_key = "ATTACK_SLAP"
+attack_cooldown = 1.0

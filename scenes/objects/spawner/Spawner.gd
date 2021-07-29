@@ -13,6 +13,7 @@ export var max_spawns:int = 5
 export var spawn_range:float = 1.0 setget set_spawn_range
 export var min_size:float = 0.5
 export var max_size:float = 1.0
+export var keep_horrors_stationary:bool = false
 export var prewarm:bool = true
 
 var active_spawns:Array = []
@@ -42,6 +43,7 @@ func _spawn_exiting(node:Node):
 
 # Picks an entity to spawn from the spawns list.  If force kill is set, game will kill the first spawn in active spawns.
 func spawn(force_kill:bool=false):
+	if !Globals.got_first_mutation: return
 	if !visible: return
 	if active_spawns.size() >= max_spawns:
 		if !force_kill: return
@@ -71,7 +73,11 @@ func spawn(force_kill:bool=false):
 		
 		randomize()
 		var size:float = rand_range(max(0.01, min_size), min(100.0, max_size))
+		if name == "EYECUBIG":
+			print("Spawner size: %s" % size)
 		inst.setup(size)
+		if keep_horrors_stationary:
+			inst.freeze()
 		
 		# listen for tree exit
 		inst.connect("tree_exiting", self, "_spawn_exiting", [inst])

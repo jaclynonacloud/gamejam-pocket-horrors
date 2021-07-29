@@ -11,7 +11,7 @@ func _ready():
 	Globals.game_ui = self
 	
 	# listen for some hud stuff
-	Globals.player.connect("health_updated", self, "_player_health_updated")
+	Globals.player.connect("health_changed", self, "_player_health_updated")
 	
 func _player_health_updated(current_health:float, max_health:float):
 	health_hud.current_health = current_health

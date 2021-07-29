@@ -1,18 +1,23 @@
-[gd_scene load_steps=5 format=2]
+[gd_scene load_steps=6 format=2]
 
 [ext_resource path="res://scenes/ui/game/fight/components/attack_item/AttackItem.tscn" type="PackedScene" id=1]
 [ext_resource path="res://scenes/ui/game/fight/FightUI.gd" type="Script" id=2]
 [ext_resource path="res://scenes/ui/game/fight/components/horror_item/HorrorItem.tscn" type="PackedScene" id=3]
 [ext_resource path="res://scenes/ui/game/fight/components/player_item/PlayerItem.tscn" type="PackedScene" id=4]
+[ext_resource path="res://scenes/ui/game/fight/components/flee_item/FleeItem.tscn" type="PackedScene" id=5]
 
 [node name="FightUI" type="Control"]
 anchor_right = 1.0
 anchor_bottom = 1.0
 mouse_filter = 2
 script = ExtResource( 2 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
 horrors_list_container_path = NodePath("HBoxContainer/HorrorsContainer/HorrorsList")
 attacks_list_container_path = NodePath("HBoxContainer/AttacksContainer/VBoxContainer/AttacksList")
 player_item_path = NodePath("HBoxContainer/AttacksContainer/VBoxContainer/PlayerItem")
+flee_item_path = NodePath("HBoxContainer/AttacksContainer/VBoxContainer/FleeItem")
 
 [node name="HBoxContainer" type="HBoxContainer" parent="."]
 anchor_right = 1.0
@@ -74,7 +79,12 @@ size_flags_horizontal = 8
 alignment = 2
 
 [node name="PlayerItem" parent="HBoxContainer/AttacksContainer/VBoxContainer" instance=ExtResource( 4 )]
-margin_top = 622.0
+margin_top = 584.0
+margin_right = 300.0
+margin_bottom = 614.0
+
+[node name="FleeItem" parent="HBoxContainer/AttacksContainer/VBoxContainer" instance=ExtResource( 5 )]
+margin_top = 618.0
 margin_right = 300.0
 margin_bottom = 652.0
 

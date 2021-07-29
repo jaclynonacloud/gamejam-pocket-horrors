@@ -9,6 +9,12 @@ var current_interval:float = -1.0
 var regen_entity:Node = null
 
 func _process(delta:float):
+	if regen_entity == null: return
+	
+	# don't give us health while in a fight
+	if regen_entity.get("is_in_fight"):
+		if regen_entity.is_in_fight: return
+		
 	if current_interval >= 0.0:
 		current_interval += delta
 		
@@ -33,4 +39,3 @@ func regen():
 		amt = regen_entity.max_health * regen_amount
 		
 	regen_entity.heal(amt)
-	print("Healing: %s" % amt)

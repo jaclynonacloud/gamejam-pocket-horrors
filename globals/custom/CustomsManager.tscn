@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=2]
+[gd_scene load_steps=12 format=2]
 
 [ext_resource path="res://globals/custom/CustomsManager.gd" type="Script" id=1]
 [ext_resource path="res://scenes/entities/horror/butterfly/Butterfly.tscn" type="PackedScene" id=2]
@@ -8,6 +8,9 @@
 [ext_resource path="res://graphics/ui/actions/key_f.png" type="Texture" id=6]
 [ext_resource path="res://scenes/entities/horror/george/George.tscn" type="PackedScene" id=7]
 [ext_resource path="res://sfx/Spooky Juice-20210724T153133Z-001/Spooky Juice/Ambient Noises/Ambient Noise- Tin Paulstretch But Just One 1.mp3" type="AudioStream" id=8]
+[ext_resource path="res://scenes/entities/shared/mutations/eyes/EyesMutation.tscn" type="PackedScene" id=9]
+[ext_resource path="res://scenes/entities/shared/mutations/wings/WingsMutation.tscn" type="PackedScene" id=10]
+[ext_resource path="res://scenes/entities/shared/mutations/gore/GoreMutation.tscn" type="PackedScene" id=11]
 
 [node name="CustomsManager" type="Node"]
 script = ExtResource( 1 )
@@ -24,4 +27,9 @@ horrors = {
 "HORROR_BUTTERFLY": ExtResource( 2 ),
 "HORROR_EYECU": ExtResource( 5 ),
 "HORROR_GORE": ExtResource( 7 )
+}
+mutations = {
+"MUTATION_EYE": ExtResource( 9 ),
+"MUTATION_GORE": ExtResource( 11 ),
+"MUTATION_WINGS": ExtResource( 10 )
 }

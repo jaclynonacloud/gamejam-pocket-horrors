@@ -15,11 +15,16 @@ WIN_TEXT,You've Become the Ultimate Horror!\nCongratulations!
 LOSE_TEXT,You've lost your way...\nYou lose.
 HORROR_EYECU,EyeCU
 HORROR_BUTTERFLY,The Bumbler
-HORROR_GORE,Agoreable George
+HORROR_GORE,A-Gore-Able George
+ELITE_KILLED_HORROR_EYECU,[color={important_colour}]Elite Killed[/color]: Ocular Oppressor
+ELITE_KILLED_HORROR_BUTTERFLY,[color={important_colour}]Elite Killed[/color]: Wind of the West Mountains
+ELITE_KILLED_HORROR_GORE,[color={important_colour}]Elite Killed[/color]: Moaning in the Swamp
 ATTACK_SLAP,Slap
 ATTACK_EVIL_EYE,Evil Eye
 ATTACK_WING,Frantic Flap
 ATTACK_GORE,Rackem' Smackem'
+ATTACK_FLEE,Flee Fight!
+MAX_POWER,(MAX)
 TYPE_NORMAL,Normal
 TYPE_EYES,Normal
 TYPE_GORE,Health
@@ -28,6 +33,8 @@ MUTATION_EYES,Eyes
 MUTATION_GORE,Antlers
 MUTATION_WINGS,Big Ol' Wings
 ACTION_EYE,Eye Spy
+ACTION_WING,Gust o' Wind
+WING_ACTION_NOTIFICATION,Your enemies seem farther away.
 SIZE_METRIC,souls
 PROGRESS_0, 
 PROGRESS_2,The skies are quiet.
@@ -42,4 +49,15 @@ MESSAGE_SIZE_INCREASED,Size increasing by
 MESSAGE_WEARY,You feel very weary.
 MESSAGE_HEALTH_PICKUP,Consume Blood Gem
 MESSAGE_FIGHT,Fight Horrors
+MESSAGE_WORLD_OPEN,Your world feels more open.
+MESSAGE_ENEMIES_SPAWN,Your enemies roar around you.
 MESSAGE_CONSUME_BLOOD_GEM,You feel replenished.
+MESSAGE_MUTATION_EYE_PICKUP,Harvest Eye
+MESSAGE_MUTATION_GORE_PICKUP,Harvest Antler
+MESSAGE_MUTATION_WINGS_PICKUP,Harvest Wing
+MESSAGE_MUTATION_EYE_PICKUP_DESCRIPTION,Your sight will improve.
+MESSAGE_MUTATION_GORE_PICKUP_DESCRIPTION,Your regen will improve.
+MESSAGE_MUTATION_WINGS_PICKUP_DESCRIPTION,Your ability to flee will improve.
+MESSAGE_MUTATION_EYE_PICKUP_INFO,You can see clearly.
+MESSAGE_MUTATION_GORE_PICKUP_INFO,Your body feels easier to heal.
+MESSAGE_MUTATION_WINGS_PICKUP_INFO,Your wings will protect you from horror.

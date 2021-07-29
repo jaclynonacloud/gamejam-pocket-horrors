@@ -1,7 +1,6 @@
-[gd_scene load_steps=4 format=2]
+[gd_scene load_steps=3 format=2]
 
 [ext_resource path="res://scenes/entities/shared/mutations/gore/GoreMutation.gd" type="Script" id=1]
-[ext_resource path="res://custom/resources/stats/StatsResource.tres" type="Resource" id=2]
 [ext_resource path="res://scenes/actions/gore/GoreAction.tscn" type="PackedScene" id=3]
 
 [node name="GoreMutation" type="Spatial"]
@@ -10,7 +9,10 @@ key = "mutation_gore"
 readable = "MUTATION_GORE"
 mutation_type = 5
 lifetime = 3
+power = 45.0
+regen_perc = 0.15
 attack_billboard_key = "ATTACK_GORE"
 trait_slot_key = "gore"
 action_resource = ExtResource( 3 )
-base_stats = ExtResource( 2 )
+attack_key = "ATTACK_GORE"
+attack_cooldown = 4.0

@@ -22,7 +22,7 @@ func toggle_splash_nodes():
 
 
 func _new_game_pressed():
-	Globals.main.play_game()
+	Globals.play_game()
 
 
 func _quit_pressed():

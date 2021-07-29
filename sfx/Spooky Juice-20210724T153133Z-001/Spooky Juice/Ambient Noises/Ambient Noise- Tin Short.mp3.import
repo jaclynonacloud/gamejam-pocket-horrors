@@ -11,5 +11,5 @@ dest_files=[ "res://.import/Ambient Noise- Tin Short.mp3-ce16c434d0ba349f03ecc96
 
 [params]
 
-loop=true
+loop=false
 loop_offset=0

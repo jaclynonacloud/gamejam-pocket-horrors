@@ -1,8 +1,8 @@
-[gd_scene load_steps=45 format=2]
+[gd_scene load_steps=48 format=2]
 
 [ext_resource path="res://graphics/game/traits/player.png" type="Texture" id=1]
 [ext_resource path="res://scenes/entities/player/Player.gd" type="Script" id=2]
-[ext_resource path="res://custom/resources/stats/StatsResource.tres" type="Resource" id=3]
+[ext_resource path="res://scenes/entities/shared/mutations/base/BaseMutation.tscn" type="PackedScene" id=3]
 [ext_resource path="res://scenes/traits/eye/EyeTrait.tscn" type="PackedScene" id=4]
 [ext_resource path="res://graphics/game/traits/eye/eye1.png" type="Texture" id=5]
 [ext_resource path="res://graphics/game/traits/eye/eye2.png" type="Texture" id=6]
@@ -20,12 +20,14 @@
 [ext_resource path="res://graphics/game/traits/wings/wing4.png" type="Texture" id=18]
 [ext_resource path="res://graphics/game/traits/wings/wing5.png" type="Texture" id=19]
 [ext_resource path="res://scenes/particles/health/HealthParticles.tscn" type="PackedScene" id=20]
+[ext_resource path="res://scenes/objects/light/Light.tscn" type="PackedScene" id=21]
+[ext_resource path="res://sfx/Spooky Juice-20210724T153133Z-001/Spooky Juice/Ambient Noises/Ambient Noise- Tin Short.mp3" type="AudioStream" id=23]
 
-[sub_resource type="CapsuleShape" id=1]
+[sub_resource type="CapsuleShape" id=4]
 radius = 2.38953
 height = 1.80064
 
-[sub_resource type="SpriteFrames" id=2]
+[sub_resource type="SpriteFrames" id=5]
 animations = [ {
 "frames": [ ExtResource( 1 ), ExtResource( 8 ) ],
 "loop": true,
@@ -41,12 +43,12 @@ animations = [ {
 "speed": 1.0
 } ]
 
-[sub_resource type="AtlasTexture" id=4]
+[sub_resource type="AtlasTexture" id=1]
 flags = 19
 atlas = ExtResource( 15 )
 region = Rect2( 0, 0, 358, 252 )
 
-[sub_resource type="AtlasTexture" id=5]
+[sub_resource type="AtlasTexture" id=2]
 flags = 19
 atlas = ExtResource( 15 )
 region = Rect2( 358, 0, 358, 252 )
@@ -58,7 +60,7 @@ region = Rect2( 716, 0, 358, 252 )
 
 [sub_resource type="SpriteFrames" id=7]
 animations = [ {
-"frames": [ SubResource( 4 ), SubResource( 5 ), SubResource( 6 ), SubResource( 5 ) ],
+"frames": [ SubResource( 1 ), SubResource( 2 ), SubResource( 6 ), SubResource( 2 ) ],
 "loop": true,
 "name": "default",
 "speed": 5.0
@@ -157,22 +159,29 @@ animations = [ {
 } ]
 
 [sub_resource type="SphereShape" id=24]
-radius = 4.318
+radius = 5.481
+
+[sub_resource type="SphereShape" id=25]
+radius = 23.3481
 
 [node name="Player" type="KinematicBody" groups=[
 "player",
 ]]
 collision_mask = 9
 script = ExtResource( 2 )
-move_speed = 3.0
-base_health = 20.0
+light_path = NodePath("Light")
+traits_container_path = NodePath("CollisionShape/Meshes/Sprite3D/TraitsContainer")
 billboard_origin_path = NodePath("CollisionShape/Meshes/BillboardOrigin")
-base_stats = ExtResource( 3 )
-fight_range = 7.0
+visuals_container_path = NodePath("CollisionShape/Meshes/Sprite3D")
+move_speed = 16.0
+max_move_speed_mult = 2.5
+pickup_area_path = NodePath("CollisionShape/Meshes/PickupArea")
+mutations_container_path = NodePath("Mutations")
+horror_area_path = NodePath("CollisionShape/Meshes/HorrorArea")
 
 [node name="CollisionShape" type="CollisionShape" parent="."]
 transform = Transform( 1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 3.337, 0 )
-shape = SubResource( 1 )
+shape = SubResource( 4 )
 
 [node name="Meshes" type="VisibilityNotifier" parent="CollisionShape"]
 transform = Transform( 1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 3.337 )
@@ -182,7 +191,7 @@ aabb = AABB( -1.652, 0.654, -1, 3.305, 4.963, 2 )
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.339689, 0 )
 centered = false
 offset = Vector2( -240, 0 )
-frames = SubResource( 2 )
+frames = SubResource( 5 )
 playing = true
 
 [node name="TraitsContainer" parent="CollisionShape/Meshes/Sprite3D" instance=ExtResource( 7 )]
@@ -280,13 +289,13 @@ transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.337, 0 )
 [node name="CameraTarget" type="Position3D" parent="CollisionShape/Meshes"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.17143, 0 )
 
-[node name="HealthArea" type="Area" parent="CollisionShape/Meshes"]
+[node name="PickupArea" type="Area" parent="CollisionShape/Meshes"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1.19209e-07 )
 monitorable = false
-collision_layer = 4
-collision_mask = 4
+collision_layer = 20
+collision_mask = 20
 
-[node name="CollisionShape" type="CollisionShape" parent="CollisionShape/Meshes/HealthArea"]
+[node name="CollisionShape" type="CollisionShape" parent="CollisionShape/Meshes/PickupArea"]
 shape = SubResource( 24 )
 
 [node name="HorrorArea" type="Area" parent="CollisionShape/Meshes"]
@@ -296,12 +305,19 @@ collision_layer = 2
 collision_mask = 2
 
 [node name="CollisionShape" type="CollisionShape" parent="CollisionShape/Meshes/HorrorArea"]
-shape = SubResource( 24 )
+shape = SubResource( 25 )
 
 [node name="BillboardOrigin" type="Position3D" parent="CollisionShape/Meshes"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.7187, 1.0054 )
 
 [node name="Mutations" type="Spatial" parent="."]
 
-[node name="DamageAudio" type="AudioStreamPlayer" parent="."]
+[node name="BaseMutation" parent="Mutations" instance=ExtResource( 3 )]
+
+[node name="Light" parent="." instance=ExtResource( 21 )]
+
+[node name="DamageAudio" type="AudioStreamPlayer3D" parent="."]
 stream = ExtResource( 9 )
+
+[node name="EliteKilledAudio" type="AudioStreamPlayer3D" parent="."]
+stream = ExtResource( 23 )

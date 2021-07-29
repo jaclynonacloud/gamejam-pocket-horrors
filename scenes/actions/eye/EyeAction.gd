@@ -8,3 +8,4 @@ func use():
 			num_eyes += 1
 			
 	Globals.player.light.expand_size(3.0, float(num_eyes) + 1.0)
+	Globals.game_camera.apply_eye_power(float(num_eyes), 3.0)

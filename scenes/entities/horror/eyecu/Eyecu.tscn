@@ -5,8 +5,7 @@
 [ext_resource path="res://scenes/entities/shared/mutations/eyes/EyesMutation.tscn" type="PackedScene" id=3]
 [ext_resource path="res://sfx/Spooky Juice-20210724T153133Z-001/Spooky Juice/Character Noises/EyeCU.mp3" type="AudioStream" id=4]
 
-[sub_resource type="BoxShape" id=1]
-extents = Vector3( 0.391402, 0.824803, 0.205151 )
+[sub_resource type="SphereShape" id=5]
 
 [sub_resource type="AtlasTexture" id=2]
 flags = 23
@@ -27,19 +26,14 @@ animations = [ {
 } ]
 
 [node name="Eyecu" instance=ExtResource( 1 )]
+MAX_VISUAL_SIZE = 6.592
+MIN_VISUAL_SIZE = 0.35
 key = "eyecu"
 readable = "HORROR_EYECU"
-move_range = 10.0
-chase_distance = 20.0
-fight_distance = 7.0
-attack_interval = 3.0
 
 [node name="CollisionShape" parent="." index="0"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.823783, 0 )
-shape = SubResource( 1 )
-
-[node name="CollisionOrigin" parent="Meshes" index="0"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.824, 0 )
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.02627, 0 )
+shape = SubResource( 5 )
 
 [node name="Sprite3D" type="AnimatedSprite3D" parent="Meshes" index="1"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.743494, 0 )
@@ -49,14 +43,13 @@ billboard = 1
 shaded = true
 frames = SubResource( 4 )
 animation = "idle"
-frame = 1
+frame = 2
 playing = true
 
-[node name="BillboardOrigin" parent="Meshes" index="3"]
+[node name="BillboardOrigin" parent="Meshes" index="2"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.10307, 0.373381 )
 
 [node name="EyesMutation" parent="Mutations" index="0" instance=ExtResource( 3 )]
-power = 3.0
 
 [node name="AmbienceAudio" parent="." index="3"]
 stream = ExtResource( 4 )

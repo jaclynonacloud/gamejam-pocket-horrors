@@ -1,13 +1,17 @@
-[gd_scene load_steps=3 format=2]
+[gd_scene load_steps=4 format=2]
 
 [ext_resource path="res://scenes/entities/shared/mutations/wings/WingsMutation.gd" type="Script" id=1]
-[ext_resource path="res://custom/resources/stats/StatsResource.tres" type="Resource" id=2]
+[ext_resource path="res://scenes/actions/wing/WingAction.tscn" type="PackedScene" id=2]
+[ext_resource path="res://sfx/Spooky Juice-20210724T153133Z-001/Spooky Juice/Damage and Hit Noises/Hit Noise 3- Weird.mp3" type="AudioStream" id=3]
 
 [node name="WingsMutation" type="Spatial"]
 script = ExtResource( 1 )
 key = "mutation_wings"
 readable = "MUTATION_WINGS"
+lifetime = 4
+power = 65.0
 attack_billboard_key = "ATTACK_WING"
 trait_slot_key = "wing"
-base_stats = ExtResource( 2 )
+action_resource = ExtResource( 2 )
 attack_key = "ATTACK_WING"
+audio_hit = ExtResource( 3 )

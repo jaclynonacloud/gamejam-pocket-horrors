@@ -18,12 +18,10 @@ animations = [ {
 } ]
 
 [node name="Butterfly" instance=ExtResource( 1 )]
-move_speed = 6.0
-base_health = 5.0
+MAX_VISUAL_SIZE = 4.546
 key = "butterfly"
 readable = "HORROR_BUTTERFLY"
-move_range = 10.0
-attack_interval = 3.0
+move_speed = 0.25
 
 [node name="CollisionShape" parent="." index="0"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.16281, 0 )
@@ -33,15 +31,11 @@ shape = SubResource( 1 )
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0 )
 aabb = AABB( -2.878, 0.764, -1, 5.755, 6.108, 2 )
 
-[node name="CollisionOrigin" parent="Meshes" index="0"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.163, 0 )
-
 [node name="AnimatedSprite3D" type="AnimatedSprite3D" parent="Meshes" index="1"]
 centered = false
 offset = Vector2( -336, 65 )
 shaded = true
 frames = SubResource( 2 )
-frame = 1
 playing = true
 
 [node name="WingsMutation" parent="Mutations" index="0" instance=ExtResource( 3 )]

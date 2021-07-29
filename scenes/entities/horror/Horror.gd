@@ -1,461 +1,385 @@
-#tool
-extends "res://scenes/entities/AbstractEntity.gd"
+# So that the Horrors aren't trying to find targets all the time, the Player will
+# let them know if they are in range to give a damn.
+#extends "res://scenes/entities/AbstractEntity.gd"
+extends RigidBody
 
-signal navigation_completed()
+signal health_changed(health, max_health)
+signal killed()
 
-const NAVIGATION_STUCK_CHECK_INTERVAL:float = 3.0 # if our horror has not moved enough in x time, time them out
-const NAVIGATION_STUCK_MARGIN:float = 0.05
+const MAX_SIZE:float = 100.0
+export var MAX_VISUAL_SIZE:float = 3.0 # letting each horror control their own max size
+export var MIN_VISUAL_SIZE:float = 1.0
 
+const STATE_IDLE:int = 1 << 0
+const STATE_CHASE:int = 1 << 2
+const STATE_FIGHT:int = 1 << 3
+const STATE_DEATH:int = 1 << 4
+
+var current_state:int = -1
+
+# key stuff
 export var key:String = "" setget , get_key
 export var readable:String = ""
-export var move_range:float = 5.0
-export var navigation_path:NodePath
-export var navigation_point_margin:float = 1.0 setget , get_navigation_point_margin # how close before the point is considered reached
-export var stuck_check_interval:float = NAVIGATION_STUCK_CHECK_INTERVAL
+export var move_speed:float = 0.2
+var speed:float = move_speed setget , get_speed
+var move_direction:Vector3 = Vector3.ZERO
+var level:int = 0 setget , get_level
+export (float, 1.0, 100.0, 1.0) var size:float = 1.0 setget set_size , get_size
+var is_dead:bool = false
+var is_frozen:bool = false
 
-export var chase_speed:float = 20.0
-export var chase_distance:float = 30.0 setget , get_chase_distance # how close the player should be before chasing is initialized
-export var chase_interest_in_seconds:float = 1.0 # how long a horror will be willing to chase the player for
-export var chase_check_interval:float = 0.5 # how often we will update the chase target
+# billboard stuff
+export var billboard_origin_path:NodePath
+onready var billboard_origin:Spatial = get_node(billboard_origin_path)
 
-export var fight_distance:float = 20.0 setget , get_fight_distance # how close the player should be before they've initiated a fight!
+# visuals stuff
+export var visuals_container_path:NodePath
+onready var visuals_container:Spatial = get_node(visuals_container_path)
 
-export var attack_interval:float = 1.0 # determines how often a horror will look to attack
+# sounds stuff
+export var damage_audio_cooldown:float = 1.0
+onready var damage_audio:AudioStreamPlayer3D = $DamagedAudio
+var current_damage_audio_cooldown:float = -1.0
+onready var death_audio:AudioStreamPlayer3D = $DeathAudio
 
-onready var navigation:Navigation = get_node_or_null(navigation_path)
-onready var fight_area:Area = $Meshes/FightArea
-onready var ambience_audio:AudioStreamPlayer3D = $AmbienceAudio
-onready var damaged_audio:AudioStreamPlayer3D = $DamagedAudio
-onready var death_audio:AudioStreamPlayer3D = $DamagedAudio
+# health stuff
+var health:float = 0.0 setget set_health
+var max_health:float = 0.0 setget , get_max_health
 
-var navigation_points:PoolVector3Array = []
-var is_rotting:bool = false # mark as true when rotting so that we don't try to interact with something that is DEAD
-# stuck check
+# idle stuff
+export var idle_movement_duration_average:float = 0.2
+export var idle_movement_duration_offset:float = 0.8
+export var idle_lounging:float = 1.0
+var current_idle_movement_duration:float = -1.0
+var random_idle_movement_duration:float = idle_movement_duration_average
+var skip_next_lounge:bool = false # skips the lounging period next time idle plays.  Useful more making them move immediately
+
+# chase stuff
+export var chase_distance:float = 8.0
+export var chase_escape_distance:float = 15.0
+export var chase_cooldown:float = 0.5 # how long we will wait before wanting to give chase again after a chase
+export var chase_speed:float = 0.24
+export var chase_interest_duration:float = 2.0
+var current_chase_interest:float = 0.0
+var current_chase_cooldown:float = -1.0
+var is_chase_cooling_down:bool = false setget , get_is_chase_cooling_down
+
+# fight stuff
+export var fight_distance:float = 4.0
+export var attack_interval:float = 2.0 # how often we will try to attack
+var current_attack_interval:float = 0.0
+export var rejected_fight_cooldown:float = 4.0  # used when we've been disallowed to fight with the player
+var current_rejected_fight_cooldown:float = -1.0
+var is_rejected_fight_cooling_down:bool = false setget , get_is_rejected_fight_cooling_down
+
+# stuck stuff
 var navigation_stuck_duration:float = 0.0
 var last_position:Vector3 = Vector3.ZERO
 var total_movement:float = 0.0
 
-var behaviour_timer:Timer = Timer.new()
-var level:int = 0 setget , get_level
+# fade stuff
+export var black_fade_duration:float = 1.0
+var current_black_fade_duration:float = -1.0
 
-# chase check
-var chase_target:Spatial = null
-var chase_exhaustion:float = -1.0
-var is_chasing:bool = false setget , get_is_chasing
-
-# fighting check
-var is_fighting:bool = false setget , get_is_fighting
-var fight_target:Spatial = null setget set_fight_target
-var fight_position:Vector3 = Vector3.ZERO
-var fighting_data:Array = [] # generate this data whenever a fight target is engaged
-var current_attack_interval:float = -1.0
-
-#func _unhandled_key_input(event):
-#	if event.pressed && event.scancode == KEY_J:
-#		damaged_audio.play()
+# mutations stuff
+onready var mutations:Array = $Mutations.get_children() setget , get_mutations
 
 func _exit_tree():
-	# let fight target know we are DEAD
-	if fight_target != null:
-		fight_target.alert_of_death(self)
+	# if we fell off the world or something, let the game know that ware unequivocably DEAD
+	emit_signal("killed")
 	
-# Called by the behaviour timer.
-func _update_behaviour():
-	if self.is_chasing:
-		navigate(chase_target.global_transform.origin)
+func _ready():
+	setup(self.size)
+	
+func _process(delta:float):
+	# handle our cooldowns!
+	# - chase cooldown
+	if current_chase_cooldown >= 0.0:
+		current_chase_cooldown += delta
+		if current_chase_cooldown >= chase_cooldown:
+			current_chase_cooldown = -1.0
+	# - damage audio cooldown
+	if current_damage_audio_cooldown >= 0.0:
+		current_damage_audio_cooldown += delta
+		if current_damage_audio_cooldown > damage_audio_cooldown:
+			current_damage_audio_cooldown = -1.0
+	# - rejected fight cooldown
+	if current_rejected_fight_cooldown >= 0.0:
+		current_rejected_fight_cooldown += delta
+		if current_rejected_fight_cooldown > rejected_fight_cooldown:
+			current_rejected_fight_cooldown = -1.0
+			
+	# update our size!
+	if visuals_container != null:
+		var desired_size:float = ((size / MAX_SIZE) * (MAX_VISUAL_SIZE - MIN_VISUAL_SIZE)) + MIN_VISUAL_SIZE
+		visuals_container.scale = Vector3.ONE * desired_size
 		
-# Called by the attack timer.
-func _do_next_attack():
-	var atks:Dictionary = self.attacks
-	print("Attack")
-	print(atks)
-	# read our attacks and find one that is not currently cooling down
-	var attack_keys:Array = atks.keys()
-	attack_keys.shuffle()
-	for key in attack_keys:
-		var attack = atks[key]
-		print("cooldown: %s" % attack.current_cooldown)
-		if attack.current_cooldown >= 0.0: continue
-		# if we got here, we can use this attack!
-		attack(attack, Globals.player)
-		return
+	update_fade_to_black(delta)
 	
-# [Override]
-func attack(attack, target:Spatial):
-	# provide the attack
-	target.take_damage(attack, self)
-	attack.current_cooldown = 0.0
+func _physics_process(delta:float):
+	# update the current state
+	update_current_state(delta)
 	
-	if attack.attack_billboard_key != "":
-		# hit them with a billboard!
-		Globals.billboards.use(attack.attack_billboard_key, Globals.player.billboard_origin.global_transform.origin)
+	# update state if ready
+	handle_state_switching()
 	
-func _body_entered(body:Node):
-	if body.is_in_group("player"):
-		if body.trigger_fight(self):
-			Globals.start_fight()
-			fight(body, true)
-	
-# [Override]
-func call_death():
-	print("We dead do something!")
-	if death_audio != null:
-		death_audio.play()
-# [Override]
-func call_damage():
-	if damaged_audio != null:
-		damaged_audio.play()
-	
-
-# [Override]
-func ready():
-	add_child(behaviour_timer)
-	
-	behaviour_timer.connect("timeout", self, "_update_behaviour")
-	
-	self.size = size
-	
-	# scale the horror only once
-	meshes_container.scale = desired_scale
-	
+func setup(_size:float):
+	# don't drop before game is ready because they just rockem sockem through the floor
+	set("mode", RigidBody.MODE_STATIC)
+	if !Globals.is_game_ready:
+		yield(Globals, "game_ready")
+	set("mode", RigidBody.MODE_RIGID)
 	
 	yield(get_tree(), "idle_frame")
 	
-	fight_area.connect("body_entered", self, "_body_entered")
+	# change to idle
+	change_state(STATE_IDLE)
 	
-	setup()
-
-# [Override]
-func process(delta:float):
-	if Engine.editor_hint: return
-	
-	# update our sprite
-	if sprite_container != null:
-#		var cam_transform = get_viewport().get_camera().get_parent().rotation_degrees
-		var cam_transform = Globals.game_camera.rotation_degrees
-		sprite_container.rotation_degrees.x = cam_transform.x
-	
-	if navigation_points.size() > 0:
-		desired_velocity = Vector3.ONE
-	else:
-		desired_velocity = Vector3.ZERO
-		
-		
-	# update our attacks if we have a fight target
-	if fight_target != null:
-		for attack in self.attacks.values():
-			if attack.update_cooldown(delta):
-				attack.reset_cooldown()
-				
-		# check our attack interval
-		if current_attack_interval >= 0.0:
-			current_attack_interval += delta
-			if current_attack_interval > (attack_interval * self.size):
-				_do_next_attack()
-				current_attack_interval = 0.0
-		
-# [Override]
-func physics_process(delta:float):
-	if Engine.editor_hint: return
-	.physics_process(delta)
-	
-	calculate_chase_exhaustion(delta)
-	calculate_navigation(delta)
-	update_stuck_check()
-	
-# [Override]
-func calculate_movement(delta:float):
-	# move our horror based on velocity
-	var pos:Vector3 = translation.direction_to(navigation_points[0]) if navigation_points.size() > 0 else Vector3.ZERO
-	var vel:float = velocity.normalized().length()
-	var direction:Vector3 = pos * self.speed * delta * vel
-	callv("apply_central_impulse", [direction])
-	
-# Sets up a horros.  Used after spawning.
-func setup(_size:float=1.0):
-	print("health: %s/%s" % [health, self.max_health])
-	
-	# setup scale
 	self.size = _size
-	rescale()
 	
-	# find navigation
-	if navigation == null:
-		navigation = Globals.navigation
+	# heal us!
+	heal(10000000.0)
 	
-	last_position = translation
-	change_collider_size()
+func freeze():
+	is_frozen = true
 	
-	yield(get_tree(), "idle_frame")
-	# setup health
-	heal_full()
-	
-	# start the next behaviour
-	next_behaviour()
-	
-# Rescales the horror.
-func rescale():
-	# scale the horror only once
-	meshes_container.scale = desired_scale
-	
-# Determines next desired behaviour.
-func next_behaviour():
-	# don't idle if chasing
-	if self.is_chasing: return
-	# don't idle if fighting -- at least not like this
-	elif self.is_fighting: return
-	# picks a new location to travel to
+
+# Changes to a new state.
+func change_state(state:int):
+	end_current_state()
+	current_state = state
+	begin_current_state()
+
+# Begins the current state.
+func begin_current_state():
+	match current_state:
+		STATE_IDLE:
+			start_idle()
+		STATE_CHASE:
+			start_chase()
+		STATE_FIGHT:
+			start_fight()
+		STATE_DEATH:
+			start_death()
+
+# Ends the current state.
+func end_current_state():
+	match current_state:
+		STATE_IDLE: 
+			end_idle()
+		STATE_CHASE:
+			end_chase()
+		STATE_FIGHT:
+			end_fight()
+		STATE_DEATH: pass # there is no end state for death; we are dead
+
+# Updates the current state.
+func update_current_state(delta:float):
+	match current_state:
+		STATE_IDLE:
+			current_idle_movement_duration += delta
+			# check if we've wandered long enough
+			if current_idle_movement_duration > random_idle_movement_duration:
+				change_state(STATE_IDLE)
+			apply_central_impulse(move_direction * self.speed)
+		STATE_CHASE:
+			var direction:Vector3 = global_transform.origin.direction_to(Globals.player.global_transform.origin)
+			move_direction = direction
+			apply_central_impulse(move_direction * self.speed)
+			
+			var distance:float = global_transform.origin.distance_to(Globals.player.global_transform.origin)
+			# if the player has escaped our chase distance, stop chasing
+			if distance >= chase_escape_distance:
+				change_state(STATE_IDLE)
+			# update our interest
+			if distance <= chase_distance:
+				current_chase_interest = chase_interest_duration
+			else:
+				current_chase_interest -= delta
+				# if we've lost interest, end our chase
+				if current_chase_interest <= 0.0:
+					change_state(STATE_IDLE)
+		STATE_FIGHT:
+			current_attack_interval += delta
+			if current_attack_interval > attack_interval:
+				try_attack()
+				current_attack_interval = 0.0
+		STATE_DEATH: pass
+		
+		
+# Handles when states will want to switch naturally.
+func handle_state_switching():
+	# check our current states for changes
+	match current_state:
+		STATE_IDLE:
+			if self.is_chase_cooling_down: return
+			if self.is_rejected_fight_cooling_down: return
+			if global_transform.origin.distance_to(Globals.player.global_transform.origin) > chase_distance: return
+			is_frozen = false
+			# if we are close to the player, chase!
+			change_state(STATE_CHASE)
+		STATE_CHASE:
+			if self.is_rejected_fight_cooling_down: return
+			if global_transform.origin.distance_to(Globals.player.global_transform.origin) > fight_distance: return
+			# if we are close to the player, fight!
+			change_state(STATE_FIGHT)
+
+# Starts idle behaviour.
+func start_idle():
+	if is_frozen: return # we don't move until player moves us
+	if skip_next_lounge:
+		skip_next_lounge = false
+		# wait for indeterminate amount of time
+		var random_lounge = rand_range(max(0.0, idle_lounging - 0.5), idle_lounging + 0.6)
+		yield(get_tree().create_timer(random_lounge), "timeout")
+
+	# picks a new direction to travel in
 	randomize()
-	var offset_position:Vector3 = Vector3(
-		rand_range(-move_range, move_range),
+	var direction:Vector3 = Vector3(
+		rand_range(-1, 1),
 		0,
-		rand_range(-move_range, move_range)
+		rand_range(-1, 1)
 	)
 	
-	# navigate to the location
-	navigate(translation + offset_position)
+	random_idle_movement_duration = rand_range(max(0.2, idle_movement_duration_average - idle_movement_duration_offset), idle_movement_duration_average + idle_movement_duration_offset)
 	
+	move_direction = direction
+	current_idle_movement_duration = 0.0
+
+# Finishes the idle behaviour.
+func end_idle():
+	current_idle_movement_duration = -1.0
+	move_direction = Vector3.ZERO
 	
-# Uses the Navigation node to navigate to a specific position.
-func navigate(position:Vector3):
-	if navigation == null: return
-	# find our desired position on the navigation
-	navigation_points = optimize_path(navigation.get_simple_path(translation, position))
-	var color:Color = Color.blue
-	if self.is_chasing: color = Color.greenyellow
-	if self.is_fighting: color = Color.red
-	Globals.debug.add_path(str(get_instance_id()), navigation_points, color)
+# Starts the chase behaviour.
+func start_chase():
+	current_chase_interest = chase_interest_duration
 	
-# Calculates a horror's chase exhaustion based on their closeness to the player, and how interested they are in chasing.
-func calculate_chase_exhaustion(delta:float):
-	if chase_target != null && chase_exhaustion >= 0.0:
-		chase_exhaustion += delta
-		# low interest means we are close
-		if chase_exhaustion > chase_interest_in_seconds:
-			stop_chasing()
+# Ends the chase behaviour.
+func end_chase():
+	current_chase_interest = 0.0
+	current_chase_cooldown = 0.0
 	
-# Chase the player! (if we are in range)
-func chase(target:Spatial):
-	if chase_target == target && self.is_chasing: return # don't bother if we are already chasing!
-	var distance:float = target.global_transform.origin.distance_to(global_transform.origin)
-	# start chasing if in distance
-	if distance <= self.chase_distance:
-		behaviour_timer.wait_time = chase_check_interval
-		chase_target = target
-		chase_exhaustion = 0.0
-		navigate(chase_target.global_transform.origin)
-		behaviour_timer.one_shot = false
-		behaviour_timer.start()
+# Starts the fight behaviour.
+func start_fight():
+	# see if we can join!
+	if !Globals.player.join_fight(self):
+		skip_next_lounge = true
+		change_state(STATE_IDLE)
+		current_rejected_fight_cooldown = 0.0
+		return
 		
-# Stops chasing the target.
-func stop_chasing():
-	chase_target = null
-	chase_exhaustion = -1.0
+	linear_velocity = Vector3.ZERO # stop us from moving
+	current_attack_interval = 0.0
 	
+# Ends the fight behaviour.
+func end_fight():
+	current_attack_interval = 0.0
 	
-# Updates the horror behaviour.
-func update_behaviour(target:Spatial):
-	if self.is_fighting: return
-	if fight(target):
-		target.fight_targets.append(self)
-		target.fight_targets = target.fight_targets # trigger setget
-		# if we were the first fight target, pitch the camera
-		if target.fight_targets.size() == 1:
-			Globals.game_camera.fight_camera()
-	else:
-		chase(target)
-	
-	
-func fight(target:Spatial, force_fight:bool=false) -> bool:
-	if fight_target != null && !force_fight: return false # we don't want to fight anyone else until the current fight is resolved
-	var distance:float = target.global_transform.origin.distance_to(global_transform.origin)
-	
-	# if we are forcing the fight, we don't care about distance!!
-	if force_fight:
-		stop_chasing()
-		navigation_points = []
-		navigation_complete()
-		self.fight_target = target
-		current_attack_interval = 0.0
-		velocity = Vector3.ZERO
-		return true
-		
-	# start fighting if in distance
-	if distance <= self.fight_distance:
-		self.fight_target = target
-		fight_position = target.global_transform.origin.linear_interpolate(global_transform.origin, 0.5)
-		stop_chasing()
-		navigate(fight_position)
-		current_attack_interval = 0.0
-		return true
-	return false
-	
-	
-# Passes on mutations to player
-func demutate():
-	var mutes:Array = mutations.duplicate(true)
-	mutes.shuffle()
-	
-	var results:Array = []
-	# go through the list of mutations, and pass on any that are picked up
-	var chance:float = rand_range(0.0, 1.0)
-	for mute in mutes:
-		if !is_instance_valid(mute): continue
-		if mute.chance > chance:
-			results.append(mute)
-			
-	return results
-	
-# Plays the rotting animation
-func rot():
-	is_rotting = true
-	# remove the debug path
-	Globals.debug.remove_path(str(get_instance_id()))
-	
-	# wait until damage sound completed
-	damaged_audio.play()
-	yield(damaged_audio, "finished")
+# Starts the death behaviour.
+func start_death():
+	print("Waiting for sweet death...")
+	fade_to_black()
+	# wait for fight to end before kicking the bucket
+	yield(Globals.player, "fight_ended")
+	print("Got death!")
+	death_audio.play()
+	yield(death_audio, "finished")
+	# clean out our var
 	queue_free()
 	
-# Checks if our horror is currently stuck with their navigation.
-func check_if_stuck():
-	# check to see if we've moved enough since last check
-	if total_movement <= NAVIGATION_STUCK_MARGIN:
-		next_behaviour()
+# --- FIGHT STUFF --- #
+# Tries out the attack.  Returns false if we could not attack.
+func try_attack():
+	var mutes:Array = self.mutations
+	mutes.shuffle()
+	for mute in mutes:
+		if mute.use():
+			attack_player(mute)
+			return true
+	return false
 		
-	total_movement = 0.0
-	last_position = translation
+# Let's us attack the player with our mutation attack!
+func attack_player(attack):
+	Globals.player.damage((attack.power * self.size) * 0.3)
+	# hit them with a billboard!
+	Globals.billboards.use(attack.attack_billboard_key, Globals.player.billboard_origin.global_transform.origin)
 	
-# Updates our movement to later check if stuck
-func update_stuck_check():
-	# gauge our total movement
-	total_movement += translation.distance_to(last_position)
-	last_position = translation
+# Heals us!
+func heal(amount:float):
+	self.health += amount
 	
-# Optimizes the path and removes dots too close together.
-func optimize_path(path:PoolVector3Array):
-	var result:PoolVector3Array = []
-	var last_dir:Vector3 = Vector3.INF
-	var last_point:Vector3 = Vector3.INF
+# Damages us!
+func damage(amount:float):
+	self.health -= amount
 	
-	for p in path:
-		var is_first_point:bool = path[0] == p
-		var is_last_point:bool = path[path.size()-1] == p
+	# play audio if it is not cooling down
+	if current_damage_audio_cooldown == -1.0:
+		damage_audio.play()
+		current_damage_audio_cooldown = 0.0
 		
-		# also, get rid of points that are closer together than our stuck margin
-		var is_minimal_distance:bool = true if last_point.distance_to(p) <= NAVIGATION_STUCK_MARGIN else false
-		
-		if is_first_point:
-			continue
-		
-		if is_last_point || !is_minimal_distance:
-			result.append(p)
-			
-		# set our data
-		last_point = p
-	return result
-	
-# Calculates if we've reached our navigation point and handles either updating the navigation or completing.
-func calculate_navigation(delta:float):
-	
-	# if we have navigation points, see if we've reached the points we want
-	if navigation_points.size() > 0:
-		var current_point:Vector3 = navigation_points[0]
-		
-		# stuck check
-		navigation_stuck_duration += delta
-		if navigation_stuck_duration > stuck_check_interval:
-			check_if_stuck()
-			navigation_stuck_duration = 0.0
-		
-		# distance check
-		var distance:float = translation.distance_to(current_point)
-		# if we've reached the point, remove it from the path
-		if distance <= self.navigation_point_margin:
-			navigation_points.remove(0)
-			# if we've reached all the points, complete the navigation
-			if navigation_points.size() <= 0:
-				navigation_complete()
-	
-# Completes the navigation.
-func navigation_complete():
-	# reset our checks
-	total_movement = 0.0
-	navigation_stuck_duration = 0.0
-	
-	# pick a random idle
-	yield(get_tree().create_timer(rand_range(0.2, 1.2)), "timeout")
-	
-	# start next behaviour
-	next_behaviour()
-	
-	emit_signal("navigation_completed")
+# Blows us away from a position!
+func blow_away(position:Vector3, force:float):
+	var direction:Vector3 = position.direction_to(global_transform.origin)
+	add_central_force(direction * force)
 
+# Fades us to black.
+func fade_to_black():
+	current_black_fade_duration = 0.0
+
+# Updates the black fade.
+func update_fade_to_black(delta:float):
+	if current_black_fade_duration >= 0.0:
+		current_black_fade_duration += delta
+		if current_black_fade_duration > black_fade_duration:
+			current_black_fade_duration = -1.0
+			
+		# update our fade
+		if current_black_fade_duration >= 0.0:
+			for child in visuals_container.get_children():
+				if child.get("modulate") != null:
+					var fade:float = min(current_black_fade_duration / black_fade_duration, 0.9)
+					var color:Color = Color.white.darkened(fade)
+					child.modulate = color
+
+# --------- GETTERS & SETTERS --------- #
 func get_key():
 	if key == "": return name
 	return key
-
-# [Override]
+	
 func get_speed():
-	if self.is_chasing: return chase_speed * get_size_multiplier()
-	return move_speed * get_size_multiplier() + 10.0 
-	
-# [Override]
-func get_attacks():
-	var results:Dictionary = .get_attacks()
-	for mutation in mutations:
-		if !is_instance_valid(mutation): continue
-		results[mutation.attack_key] = mutation
-	return results
-	
-# [Override]
-func set_size(value:float):
-	.set_size(value)
-	
-	# update audio affectiveness
-	var size_ratio:float = size / MAX_SIZE
-	var max_db:float = 15.0
-	var min_db:float = -11.0
-	
-	if ambience_audio != null:
-#		ambience_audio.unit_size = size_ratio * 15.0
-		ambience_audio.unit_db = (max_db - min_db) * (size_ratio * 1.3) + min_db
+	match current_state:
+		STATE_CHASE: return chase_speed
+		_: return move_speed
 		
-	# pitching
-	var min_pitch:float = 0.8
-	var max_pitch:float = 3.0
-	
-	if damaged_audio != null:
-		var pitch:float = (min_pitch / max_pitch) * (1.0 - size_ratio) + min_pitch
-		damaged_audio.pitch_scale = pitch
-
 func get_level():
-	return ceil(self.size * 100) / 35.0
+	return ceil((self.size / MAX_SIZE) * 100.0)
 	
-func get_chase_distance():
-	return 0
-#	return chase_distance
-#	return chase_distance + chase_distance * (get_size_multiplier() * 0.10)
+func set_size(value:float):
+	size = value
 	
-func get_fight_distance():
-	return 0
-#	return fight_distance
-#	return fight_distance + fight_distance * (get_size_multiplier() * 0.05)
+func get_size():
+	return size
 	
-func get_is_chasing():
-	return chase_exhaustion >= 0.0
+func set_health(value:float):
+	health = clamp(value, 0.0, self.max_health)
+	emit_signal("health_changed", health, self.max_health)
+	if health <= 0.0:
+		emit_signal("killed")
 	
-func get_is_fighting():
-	return fight_target != null
+func get_max_health():
+	return 100.0 * (self.size * 0.4)
 
-func set_fight_target(value:Spatial):
-	var last_target:Spatial = fight_target
-	fight_target = value
+func get_is_chase_cooling_down():
+	return current_chase_cooldown >= 0.0
 	
-	# turn our fight timer on/off
-	if fight_target == last_target: return
-	if fight_target == null:
-		current_attack_interval = -1.0
+func get_is_rejected_fight_cooling_down():
+	return current_rejected_fight_cooldown >= 0.0
 
-func get_navigation_point_margin():
-	return navigation_point_margin
+func get_mutations():
+	var results:Array = []
+	for mute in $Mutations.get_children():
+		if !is_instance_valid(mute): continue
+		if mute == null: continue
+		results.append(mute)
+	return results

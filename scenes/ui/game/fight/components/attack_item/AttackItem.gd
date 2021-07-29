@@ -16,7 +16,7 @@ onready var action_key_node:Control = get_node(action_key_node_path)
 
 var cooldown:float = 0.0 setget set_cooldown
 var max_cooldown:float = 100.0
-var readable:String = "" setget set_readable
+export var readable:String = "" setget set_readable
 var power:int = 0 setget set_power
 var type:String = "" setget set_type
 var is_active:bool = false setget set_is_active
@@ -42,6 +42,7 @@ func set_power(value:int):
 	
 	if power_node != null:
 		if power <= 1: power_node.text = ""
+		elif power >= 5: power_node.text = Globals.translate("MAX_POWER")
 		else: power_node.text = "%sx" % power
 	
 func set_type(value:String):

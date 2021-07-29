@@ -1,0 +1,32 @@
+[gd_scene load_steps=7 format=2]
+
+[ext_resource path="res://scenes/objects/mutation_pickup/MutationPickup.tscn" type="PackedScene" id=1]
+[ext_resource path="res://graphics/game/traits/eye/eye1.png" type="Texture" id=2]
+[ext_resource path="res://graphics/game/traits/eye/eye2.png" type="Texture" id=3]
+[ext_resource path="res://scenes/traits/eye/EyeTrait.tscn" type="PackedScene" id=4]
+[ext_resource path="res://scenes/particles/smack/SmackParticles.tscn" type="PackedScene" id=5]
+
+[sub_resource type="SpriteFrames" id=1]
+animations = [ {
+"frames": [ ExtResource( 2 ), ExtResource( 3 ) ],
+"loop": true,
+"name": "default",
+"speed": 1.0
+} ]
+
+[node name="EyeMutationPickup" instance=ExtResource( 1 )]
+key = "MUTATION_EYE"
+
+[node name="Area" parent="." index="0"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.920676, 0 )
+
+[node name="Visuals" parent="." index="1"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.129868, 0 )
+aabb = AABB( -1, -0.112, -1, 2, 2, 2 )
+
+[node name="Eye" parent="Visuals" index="0" instance=ExtResource( 4 )]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0415245, 0.824492, 0.226051 )
+frames = SubResource( 1 )
+frame = 1
+
+[node name="SmackParticles" parent="Visuals" index="1" instance=ExtResource( 5 )]
